@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import mongodbConfig from 'src/utils/mongodb.config';
+import mongodbConfig from 'src/utils/mongodbconfig';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
