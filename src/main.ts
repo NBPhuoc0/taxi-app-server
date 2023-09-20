@@ -3,9 +3,6 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from './utils/swagger';
 import helmet from 'helmet';
-import * as cookieParser from 'cookie-parser';
-
-
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -18,7 +15,6 @@ async function bootstrap() {
       whitelist: true
     })
   )
-  app.use(cookieParser())
   const logger = new Logger('Main')
 
   setupSwagger(app)
