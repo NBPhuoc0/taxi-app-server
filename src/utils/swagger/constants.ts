@@ -1,4 +1,4 @@
-export const SWAGGER_API_ROOT = 'docs';
+export const SWAGGER_API_ROOT = '';
 export const SWAGGER_API_NAME = 'TAXI APP API';
 export const SWAGGER_API_DESCRIPTION =
     'Taxi App API Description';

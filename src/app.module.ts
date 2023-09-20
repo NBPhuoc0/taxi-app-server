@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import mongodbConfig from 'src/utils/mongodbconfig';
+import mongodbConfig from './utils/mongodb.config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
@@ -20,7 +20,7 @@ import { MongooseModule } from '@nestjs/mongoose';
       inject: [ConfigService],
     }),
     UsersModule, ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
