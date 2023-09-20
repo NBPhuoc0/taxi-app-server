@@ -3,6 +3,9 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from './utils/swagger';
 import helmet from 'helmet';
+var cookieParser = require('cookie-parser');
+
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -15,12 +18,13 @@ async function bootstrap() {
       whitelist: true
     })
   )
+  app.use(cookieParser())
   const logger = new Logger('Main')
 
   setupSwagger(app)
   app.use(helmet())
 
   await app.listen(3000);
-  logger.log(`API Documentation available at localhost:3000/docs`);
+  logger.log(`API Documentation available at localhost:3000`);
 }
 bootstrap();
