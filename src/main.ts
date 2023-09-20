@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from './utils/swagger';
 import helmet from 'helmet';
-var cookieParser = require('cookie-parser');
+import cookieParser from 'cookie-parser';
 
 
 
