@@ -1,7 +1,7 @@
 {
     "version": 2,
     "env": {
-        "MONGO_URI": "@mongo_uri"
+        "MONGO_URI": "mongodb://nbphuoc:2WKu8fdTXKOFUpcaheMOsdN9VFCo2X2o8L6FyS3Ns3CIqsA7nRP1TPKZIdv1nr0p6Cuh8EyT2z4ZACDbwTytXg==@nbphuoc.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@nbphuoc@"
     },
     "builds": [
         {
