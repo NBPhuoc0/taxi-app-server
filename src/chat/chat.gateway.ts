@@ -35,9 +35,8 @@ export class ChatGateway implements OnGatewayInit,OnGatewayConnection,OnGatewayD
   @SubscribeMessage('findAllChat')
   findAll(@MessageBody() data: string,@ConnectedSocket() socket: Socket)  {
     var txt = this.chatService.findAll();
-    this.logger.log(txt);
-    this.server.emit('findAllChat',txt);
-    return txt;
+    this.server.emit('rev',data);
+    return data;
   }
 
   @SubscribeMessage('findOneChat')

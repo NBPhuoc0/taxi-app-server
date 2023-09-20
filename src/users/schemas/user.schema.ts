@@ -3,9 +3,6 @@ import mongoose, { Document } from "mongoose";
 
 export type UserDocument = User & Document;
 
-
-
-
 @Schema({
     toJSON: {
         getters: true,

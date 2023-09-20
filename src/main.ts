@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from './utils/swagger';
 import helmet from 'helmet';
+import { AzureSocketIO } from './chat/adapters/azure-pubsub.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -19,6 +20,8 @@ async function bootstrap() {
 
   setupSwagger(app)
   app.use(helmet())
+
+  app.useWebSocketAdapter(new AzureSocketIO(app))
 
   await app.listen(3000);
   logger.log(`API Documentation available at localhost:3000`);
