@@ -23,7 +23,11 @@ async function bootstrap() {
 
   //app.useWebSocketAdapter(new AzureSocketIO(app))
 
-  await app.listen(3000);
-  logger.log(`API Documentation available at localhost:3000`);
+  await app.listen(AppModule.port)
+
+  // log docs
+  const baseUrl = AppModule.getBaseUrl(app)
+  const url = `http://${baseUrl}:${AppModule.port}`
+  logger.log(`API Documentation available at ${url}`);
 }
 bootstrap();

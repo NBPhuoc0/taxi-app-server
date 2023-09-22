@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { INestApplication, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -25,4 +25,17 @@ import { ChatModule } from './chat/chat.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule {
+  static port: number | string;
+
+  constructor(private configService: ConfigService) {
+    AppModule.port = this.configService.get('PORT');
+  }
+
+  static getBaseUrl(app: INestApplication): string {
+    let baseUrl = app.getHttpServer().address().address;
+    if (baseUrl == '0.0.0.0' || baseUrl == '::') {
+        return (baseUrl = 'localhost');
+    }
+}
+}
