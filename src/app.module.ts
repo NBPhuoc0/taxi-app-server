@@ -29,7 +29,7 @@ export class AppModule {
   static port: number | string;
 
   constructor(private configService: ConfigService) {
-    AppModule.port = this.configService.get('PORT') || 3000;
+    AppModule.port = process.env.PORT || 8080;
   }
 
   static getBaseUrl(app: INestApplication): string {
