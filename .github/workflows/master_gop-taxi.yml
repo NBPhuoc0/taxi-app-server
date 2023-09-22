@@ -25,17 +25,13 @@ jobs:
         run: |
           npm install
           npm run build --if-present
-          # npm run test --if-present --passWithNoTests
-
-
-      - name: Zip all files for upload between jobs
-        run: zip --symlinks -r nest.zip ./*
+          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
           name: node-app
-          path: nest.zip
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -56,8 +52,5 @@ jobs:
         with:
           app-name: 'gop-taxi'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_5B5FB0C0D40A43389250C95ABF95787C }}
-          package: nest.zip
-
-      - name: Delete zip file
-        run: rm nest.zip
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BE77053EFE72490B927C0E2592295FA1 }}
+          package: .
