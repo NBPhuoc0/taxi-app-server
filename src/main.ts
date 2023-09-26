@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from './utils/swagger';
 import helmet from 'helmet';
+import { HttpExceptionFilter } from './utils/filters/http-exception.filter';
 // import { AzureSocketIO } from './chat/adapters/azure-pubsub.adapter';
 
 async function bootstrap() {
@@ -16,12 +17,12 @@ async function bootstrap() {
       whitelist: true
     })
   )
+  app.useGlobalFilters(new HttpExceptionFilter())
+
   const logger = new Logger('Main')
 
   setupSwagger(app)
   app.use(helmet())
-
-  //app.useWebSocketAdapter(new AzureSocketIO(app))
 
   await app.listen(AppModule.port)
 
