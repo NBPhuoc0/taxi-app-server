@@ -23,7 +23,7 @@ export function setupSwagger(app: INestApplication): void {
         .setTitle(SWAGGER_API_NAME)
         .setDescription(SWAGGER_API_DESCRIPTION)
         .setVersion(SWAGGER_API_CURRENT_VERSION)
-        .addBearerAuth()    
+        .addBearerAuth()
 
         .build();
 

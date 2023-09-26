@@ -3,9 +3,13 @@ import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 import { Logger } from '@nestjs/common';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
+import { ApiTags } from '@nestjs/swagger';
+import { connect } from 'http2';
 
+@ApiTags('chat')
 @WebSocketGateway({ 
+  namespace: 'chat',
   cors: {origin: '*',},
 })
 export class ChatGateway implements OnGatewayInit,OnGatewayConnection,OnGatewayDisconnect {
@@ -14,6 +18,7 @@ export class ChatGateway implements OnGatewayInit,OnGatewayConnection,OnGatewayD
 
   private logger: Logger = new Logger('MessageGateway');
   constructor(private readonly chatService: ChatService) {}
+
 
   handleConnection(client: any, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
@@ -32,8 +37,9 @@ export class ChatGateway implements OnGatewayInit,OnGatewayConnection,OnGatewayD
     return this.chatService.create(createChatDto);
   }
 
+  
   @SubscribeMessage('findAllChat')
-  findAll(@MessageBody() data: string,@ConnectedSocket() socket: Socket)  {
+  findAll(@MessageBody() data: string)  {
     var txt = this.chatService.findAll();
     this.server.emit('rev',data);
     return data;

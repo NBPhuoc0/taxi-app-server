@@ -1,11 +1,10 @@
 import { INestApplication, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import mongodbConfig from './utils/mongodb.config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ChatModule } from './chat/chat.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -21,7 +20,8 @@ import { ChatModule } from './chat/chat.module';
       inject: [ConfigService],
     }),
     UsersModule,
-    ChatModule, ],
+    ChatModule,
+    AuthModule, ],
   controllers: [],
   providers: [],
 })
