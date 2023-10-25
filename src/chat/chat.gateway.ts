@@ -5,7 +5,6 @@ import { UpdateChatDto } from './dto/update-chat.dto';
 import { Logger } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { ApiTags } from '@nestjs/swagger';
-import { connect } from 'http2';
 
 @ApiTags('chat')
 @WebSocketGateway({ 
@@ -15,6 +14,7 @@ import { connect } from 'http2';
 export class ChatGateway implements OnGatewayInit,OnGatewayConnection,OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
+
 
   private logger: Logger = new Logger('MessageGateway');
   constructor(private readonly chatService: ChatService) {}

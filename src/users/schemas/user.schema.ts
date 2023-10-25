@@ -2,7 +2,6 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 
 export type UserDocument = User & Document;
-
 @Schema({
     toJSON: {
         getters: true,
@@ -12,17 +11,22 @@ export type UserDocument = User & Document;
 })
 export class User {
     @Prop({ required: true, unique: true })
-    username: string
+    phone: string
 
     @Prop({ required: true })
-    password: string
+    fullname: string
 
-    @Prop({ required: true, unique: true })
+    @Prop({  })
     email: string
+
+    @Prop({ })
+    location: [{
+        lat: number,
+        long: number
+    }]
 
     @Prop()
     refreshToken: string
-
 }
 
 
