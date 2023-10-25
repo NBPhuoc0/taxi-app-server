@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsPhoneNumber, IsString } from "class-validator";
-export class UserDto {
+import { IsNotEmpty, IsNumberString, IsPhoneNumber, IsString, Length } from "class-validator";
+
+export class CreateUserDto_verify {
     @ApiProperty({
         type: String,
         description: 'phone property of a user and validates that it is unique',
@@ -20,6 +21,16 @@ export class UserDto {
     @IsString()
     @IsNotEmpty()
     fullname: string;
+
+    @ApiProperty({
+        type: String,
+        description: 'fullname property of a user',
+        example: '000000',
+        required: true,
+    })
+    @IsNumberString()
+    @Length(6, 6)
+    code: string;
 
     refreshToken: string;
     email: string;

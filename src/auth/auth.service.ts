@@ -1,51 +1,112 @@
-import { AuthDto } from './dto/auth.dto';
-import { CreateUserDto } from './../users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from './../users/users.service';
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt';
 import JwtPayload from './interface/jwtPayload.interface';
+import { TwilioService } from 'nestjs-twilio';
+import { CreateUserDto_send } from 'src/users/dto/signup-send.dto';
+import { CreateUserDto_verify } from 'src/users/dto/signup-verify.dto';
+import { AuthDto_send } from './dto/auth_send.dto';
+import { AuthDto_verify } from './dto/auth_verify.dto';
+import { UserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
         private configService: ConfigService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private readonly twilioService: TwilioService
     ) {}
 
-    async signUp(createUserDto: CreateUserDto): Promise<any> {
-        const user = await this.usersService.findByEmail(createUserDto.email)
+    logger = new Logger('AuthService');
 
-        if(user) throw new BadRequestException('User already exists')
+    async signUpOTP_send(createUserDto: CreateUserDto_send): Promise<any> {
+        const user = await this.usersService.findByPhone(createUserDto.phone)
 
-        // hash password
-        const hash = await this.hashData(createUserDto.password)
-        const newUser = await this.usersService.create({
-            ...createUserDto,
-            password: hash
-        })
-
-        const tokens = await this.getTokens(newUser._id, newUser.email)
-        await this.updateRefreshToken(newUser._id, tokens.refreshToken)
-        return { ...tokens }
+        if(user) throw new BadRequestException('Phone number already exists')
+        else {
+            const msg = await this.sendOTP(createUserDto.phone);
+            return msg;
+        }
+        
+    }
+    
+    async signUpOTP_verify(createUserDto: CreateUserDto_verify): Promise<any> {
+        const otp_check = await this.verifyOTP(createUserDto.phone, createUserDto.code);
+        if (otp_check) {
+            const newUser = await this.usersService.create({
+                ...createUserDto,
+            })
+        
+            const tokens = await this.getTokens(newUser._id, newUser.phone)
+            await this.updateRefreshToken(newUser._id, tokens.refreshToken)
+            return { ...tokens }
+        } else {
+            throw new BadRequestException('OTP is not correct')
+        }
     }
 
 
-    async signIn(authDto: AuthDto) {
-        const user = await this.usersService.findByEmail(authDto.email)
+
+    async signInOTP_send(authDto: AuthDto_send) {
+        const user = await this.usersService.findByPhone(authDto.phone)
 
         if(!user) throw new NotFoundException('User does not exist')
+        else {
+            const msg = await this.sendOTP(authDto.phone);
+            return msg;
+        }
+    }
 
-        const passwordMatches = await argon2.verify(user.password, authDto.password)
+    async signInOTP_verify(authDto: AuthDto_verify) {
+        if (await this.verifyOTP(authDto.phone, authDto.code)) {
+            const user = await this.usersService.findByPhone(authDto.phone)
+            const tokens = await this.getTokens(user._id, user.phone)
+            await this.updateRefreshToken(user._id, tokens.refreshToken)
+            return { ...tokens }
+        } else {
+            throw new BadRequestException('OTP is not correct')
+        }
+        // return this.verifyOTP(authDto.phone, authDto.code);
+    }
 
-        if (!passwordMatches) throw new BadRequestException('Incorrect email or password')
 
-        const tokens = await this.getTokens(user._id, user.email)
-        await this.updateRefreshToken(user._id, tokens.refreshToken)
-        return { ...tokens }
 
+    async sendOTP(phone: string) {
+        let msg ;
+        try {
+            await this.twilioService.client.verify.v2
+                .services(this.configService.get('TWILIO_VERIFY_SERVICE_SID'))
+                .verifications.create({to: phone, channel: 'sms'})
+                .then(verifications => { msg = verifications});
+        } catch (error) {
+            this.logger.log(error);
+            return error;
+        }
+        return msg;
+    }
+
+    async verifyOTP(phone: string, code: string) {
+        this.logger.log('verifyOTP: '.concat(code));
+        let msg;
+        try {
+            await this.twilioService.client.verify.v2
+                .services(this.configService.get('TWILIO_VERIFY_SERVICE_SID'))
+                .verificationChecks.create({to: phone, code: code})
+                .then(verification_check => { msg = verification_check});
+            if (msg.status === 'approved') {
+                this.logger.log('ố dè');
+                return true;
+            } else {
+                this.logger.log('nuh uh');
+                return false;
+            }
+        } catch (error) {
+            this.logger.log(error);
+            return false;
+        }
     }
 
     async logout(userId: string) {
@@ -62,12 +123,12 @@ export class AuthService {
         await this.usersService.update(userId, { refreshToken: hashedRefreshToken })
     }
 
-    async getTokens(userId: string, email: string) {
+    async getTokens(userId: string, phone: string) {
         const [ accessToken, refreshToken ] = await Promise.all([
             this.jwtService.signAsync(
                 {
                     sub: userId,
-                    email
+                    phone
                 },
                 {
                     secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
@@ -77,7 +138,7 @@ export class AuthService {
             this.jwtService.signAsync(
                 {
                     sub: userId,
-                    email
+                    phone
                 },
                 {
                     secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
@@ -120,4 +181,5 @@ export class AuthService {
             return this.usersService.findById(userId);
         }
       }
+
 }

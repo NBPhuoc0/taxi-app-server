@@ -5,6 +5,8 @@ import mongodbConfig from './utils/mongodb.config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ChatModule } from './chat/chat.module';
 import { AuthModule } from './auth/auth.module';
+import { OrdersModule } from './orders/orders.module';
+import { DriversModule } from './drivers/drivers.module';
 
 @Module({
   imports: [
@@ -21,7 +23,9 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule,
     ChatModule,
-    AuthModule, ],
+    AuthModule,
+    OrdersModule,
+    DriversModule, ],
   controllers: [],
   providers: [],
 })
