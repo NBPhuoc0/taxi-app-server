@@ -5,8 +5,6 @@ import {
     SWAGGER_API_NAME,
     SWAGGER_API_DESCRIPTION,
     SWAGGER_API_CURRENT_VERSION,
-    SWAGGER_API_AUTH_NAME,
-    SWAGGER_API_AUTH_LOCATION,
 } from './constants';
 import { SwaggerDocumentOptions } from './option.type';
 
@@ -28,7 +26,8 @@ export function setupSwagger(app: INestApplication): void {
         .build();
 
     const options: SwaggerDocumentOptions = {
-        operationIdFactory: (controllerKey: string, methodKey: string) =>
+      ignoreGlobalPrefix: true,
+      operationIdFactory: (controllerKey: string, methodKey: string) =>
             methodKey,
     };
     const document = SwaggerModule.createDocument(app, config, options);

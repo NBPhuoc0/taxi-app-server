@@ -1,4 +1,4 @@
-import { ApiTags, ApiBody, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiCreatedResponse, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import RequestWithUser from './interface/requestWithUser.interface';
@@ -20,7 +20,7 @@ export class AuthController {
         type: CreateUserDto_send,
         
     })
-    @ApiCreatedResponse({
+    @ApiOkResponse({
         status: 200,
         description: 'returns 200 status when phone number is valid and sends OTP',
     })
@@ -49,7 +49,7 @@ export class AuthController {
         type: AuthDto_send,
         
     })
-    @ApiCreatedResponse({
+    @ApiOkResponse({
         status: 200,
         description: 'returns 200 status when phone number is valid and sends OTP',
     })
@@ -63,7 +63,7 @@ export class AuthController {
         type: AuthDto_verify,
         
     })
-    @ApiCreatedResponse({
+    @ApiOkResponse({
         status: 200,
         description: 'returns 200 status and a refresh and access token when a user successfully signs in',
     })
@@ -73,7 +73,7 @@ export class AuthController {
     }
   
 
-    @ApiCreatedResponse({
+    @ApiOkResponse({
         status: 200,
         description: 'returns 200 status and logs a user out',
     })
@@ -83,7 +83,7 @@ export class AuthController {
       this.authService.logout(req.user['sub']);
     }
 
-    @ApiCreatedResponse({
+    @ApiOkResponse({
         status: 200,
         description: 'returns 200 status and return a refresh and access token',
     })
@@ -92,17 +92,11 @@ export class AuthController {
     async refreshTokens(@Req() req: RequestWithUser) {
         const userId = req.user['sub'];
         const refreshToken = req.user['refreshToken'];
-        const data = await this.authService.refreshTokens(userId, refreshToken)
-        return {
-            message: 'success',
-            data: {
-                ...data
-            }
-        }
+        return await this.authService.refreshTokens(userId, refreshToken)
     }
 
 
-    @ApiCreatedResponse({
+    @ApiOkResponse({
         status: 200,
         description: 'returns 200 status current logged in User object',
     })

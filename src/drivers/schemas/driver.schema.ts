@@ -18,12 +18,6 @@ export class Driver {
     phone: string
 
     @Prop({ required: true })
-    password: string
-
-    @Prop({ required: true, unique: true })
-    email: string
-
-    @Prop({ required: true })
     vehicle: Vehicle
 
     @Prop({ required: true })
@@ -34,6 +28,12 @@ export class Driver {
 
     @Prop({ required: true })
     vehicleImage: string
+
+    @Prop({ })
+    location: {
+        lat: number,
+        long: number
+    }
 
     @Prop({ required: true, default: Status.OFFLINE })
     status: Status

@@ -1,15 +1,12 @@
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from './../users/users.service';
 import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt';
-import JwtPayload from './interface/jwtPayload.interface';
 import { TwilioService } from 'nestjs-twilio';
 import { CreateUserDto_send } from 'src/users/dto/signup-send.dto';
 import { CreateUserDto_verify } from 'src/users/dto/signup-verify.dto';
 import { AuthDto_send } from './dto/auth_send.dto';
 import { AuthDto_verify } from './dto/auth_verify.dto';
-import { UserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -113,14 +110,8 @@ export class AuthService {
         return this.usersService.update(userId, { refreshToken: null })
     }
 
-    async hashData(data: string) {
-        return argon2.hash(data)
-    }
-
     async updateRefreshToken(userId: string, refreshToken: string) {
-        const hashedRefreshToken = await this.hashData(refreshToken)
-
-        await this.usersService.update(userId, { refreshToken: hashedRefreshToken })
+        await this.usersService.update(userId, { refreshToken: refreshToken })
     }
 
     async getTokens(userId: string, phone: string) {
@@ -158,28 +149,12 @@ export class AuthService {
         const user = await this.usersService.findById(userId);
         if (!user || !user.refreshToken)
           throw new ForbiddenException('Access Denied');
-        const refreshTokenMatches = await argon2.verify(
-          user.refreshToken,
-          refreshToken,
-        );
+        const refreshTokenMatches = user.refreshToken === refreshToken
         if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
-        const tokens = await this.getTokens(user._id, user.email);
+        const tokens = await this.getTokens(user._id, user.phone);
         await this.updateRefreshToken(user._id, tokens.refreshToken);
-        return { ...tokens, ...user };
+        return { ...tokens};
       
     }
-
-
-    public async getUserFromAuthenticationToken(token: string) {
-        const payload: JwtPayload = this.jwtService.verify(token, {
-          secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
-        });
-        
-        const userId = payload.sub
-
-        if (userId) {
-            return this.usersService.findById(userId);
-        }
-      }
 
 }
