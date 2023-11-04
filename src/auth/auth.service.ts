@@ -37,7 +37,7 @@ export class AuthService {
                 ...createUserDto,
             })
         
-            const tokens = await this.getTokens(newUser._id, newUser.phone)
+            const tokens = await this.getTokens(newUser._id, newUser.phone, newUser.fullname)
             await this.updateRefreshToken(newUser._id, tokens.refreshToken)
             return { ...tokens }
         } else {
@@ -60,7 +60,7 @@ export class AuthService {
     async signInOTP_verify(authDto: AuthDto_verify) {
         if (await this.verifyOTP(authDto.phone, authDto.code)) {
             const user = await this.usersService.findByPhone(authDto.phone)
-            const tokens = await this.getTokens(user._id, user.phone)
+            const tokens = await this.getTokens(user._id, user.phone, user.fullname)
             await this.updateRefreshToken(user._id, tokens.refreshToken)
             return { ...tokens }
         } else {
@@ -114,12 +114,13 @@ export class AuthService {
         await this.usersService.update(userId, { refreshToken: refreshToken })
     }
 
-    async getTokens(userId: string, phone: string) {
+    async getTokens(userId: string, phone: string, fullName: string) {
         const [ accessToken, refreshToken ] = await Promise.all([
             this.jwtService.signAsync(
                 {
                     sub: userId,
-                    phone
+                    phone,
+                    fullName
                 },
                 {
                     secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
@@ -129,7 +130,8 @@ export class AuthService {
             this.jwtService.signAsync(
                 {
                     sub: userId,
-                    phone
+                    phone,
+                    fullName
                 },
                 {
                     secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
@@ -151,10 +153,14 @@ export class AuthService {
           throw new ForbiddenException('Access Denied');
         const refreshTokenMatches = user.refreshToken === refreshToken
         if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
-        const tokens = await this.getTokens(user._id, user.phone);
+        const tokens = await this.getTokens(user._id, user.phone, user.fullname);
         await this.updateRefreshToken(user._id, tokens.refreshToken);
         return { ...tokens};
       
+    }
+
+    async getUserFromAuthenticationToken(){
+
     }
 
 }
