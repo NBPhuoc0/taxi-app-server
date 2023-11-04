@@ -104,12 +104,7 @@ export class AuthController {
     @Get('me')
     getCurrentUser(@Req() req: RequestWithUser) {
         const user = req.user
-        return {
-            message: 'success',
-            data: {
-                ...user
-            }
-        }
+        return user
     }
 
 }
