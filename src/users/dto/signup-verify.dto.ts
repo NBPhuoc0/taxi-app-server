@@ -34,5 +34,5 @@ export class CreateUserDto_verify {
 
     refreshToken: string;
     email: string;
-
+    avatar: string;
 }

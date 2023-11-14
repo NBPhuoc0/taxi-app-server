@@ -96,15 +96,4 @@ export class AuthController {
     }
 
 
-    @ApiOkResponse({
-        status: 200,
-        description: 'returns 200 status current logged in User object',
-    })
-    @UseGuards(AccessTokenGuard)
-    @Get('me')
-    getCurrentUser(@Req() req: RequestWithUser) {
-        const user = req.user
-        return user
-    }
-
 }
