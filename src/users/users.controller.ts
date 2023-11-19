@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Param, Delete, Logger, UseGuards, UseInterceptors, UploadedFile, Req, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { AccessTokenGuard } from 'src/utils/guards/accessToken.guard';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AccessTokenGuard } from '../utils/guards/accessToken.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import RequestWithUser from 'src/auth/interface/requestWithUser.interface';
+import RequestWithUser from '../utils/interface/requestWithUser.interface';
 
 @ApiTags('Users')
 @Controller('users')
-@UseGuards(AccessTokenGuard)
+@ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {
   } 
@@ -23,10 +23,6 @@ export class UsersController {
     return user
   }
 
-  @Get('me/location')
-  getAllUsers() {
-    return this.usersService.findAll();
-  }
 
   @Patch('update/avatar')
   @UseGuards(AccessTokenGuard)

@@ -3,11 +3,13 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import mongodbConfig from './utils/mongodb.config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ChatsModule } from './chats/chats.module';
+
 import { AuthModule } from './auth/auth.module';
 import { OrdersModule } from './orders/orders.module';
 import { DriversModule } from './drivers/drivers.module';
 import { AzureStorageModule } from './utils/auzre/storage-blob.module';
+import { SocketModule } from './socket/socket.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -23,11 +25,12 @@ import { AzureStorageModule } from './utils/auzre/storage-blob.module';
       inject: [ConfigService],
     }),
     UsersModule,
-    ChatsModule,
+    SocketModule,
     AuthModule,
     OrdersModule,
     DriversModule,
-    AzureStorageModule
+    AzureStorageModule,
+    AdminModule
    ],
   controllers: [],
   providers: [],

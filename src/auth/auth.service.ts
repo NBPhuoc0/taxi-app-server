@@ -1,17 +1,25 @@
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from './../users/users.service';
-import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TwilioService } from 'nestjs-twilio';
-import { CreateUserDto_send } from 'src/users/dto/signup-send.dto';
-import { CreateUserDto_verify } from 'src/users/dto/signup-verify.dto';
+import { CreateUserDto_send } from '../users/dto/signup-send.dto';
+import { CreateUserDto_verify } from '../users/dto/signup-verify.dto';
 import { AuthDto_send } from './dto/auth_send.dto';
 import { AuthDto_verify } from './dto/auth_verify.dto';
-
+import * as argon2 from 'argon2'
+import { DriversService } from '../drivers/drivers.service';
+import { AdminService } from '../admin/admin.service';
+import { CreateDriverDto } from '../drivers/dto/create-driver.dto';
+import { filesUploadDTO } from '../drivers/dto/files.dto';
+import { AuthDto_pass_driver } from './dto/auth_pass_driver.dto';
+import { AuthDto_pass_admin } from './dto/auth_pass_admin.dto';
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
+        private driverService: DriversService,
+        private adminService: AdminService,
         private configService: ConfigService,
         private jwtService: JwtService,
         private readonly twilioService: TwilioService
@@ -37,8 +45,8 @@ export class AuthService {
                 ...createUserDto,
             })
         
-            const tokens = await this.getTokens(newUser._id, newUser.phone, newUser.fullname)
-            await this.updateRefreshToken(newUser._id, tokens.refreshToken)
+            const tokens = await this.getTokens(newUser._id)
+            await this.updateRefreshTokenU(newUser._id, tokens.refreshToken)
             return { ...tokens }
         } else {
             throw new BadRequestException('OTP is not correct')
@@ -60,8 +68,8 @@ export class AuthService {
     async signInOTP_verify(authDto: AuthDto_verify) {
         if (await this.verifyOTP(authDto.phone, authDto.code)) {
             const user = await this.usersService.findByPhone(authDto.phone)
-            const tokens = await this.getTokens(user._id, user.phone, user.fullname)
-            await this.updateRefreshToken(user._id, tokens.refreshToken)
+            const tokens = await this.getTokens(user._id)
+            await this.updateRefreshTokenU(user._id, tokens.refreshToken)
             return { ...tokens }
         } else {
             throw new BadRequestException('OTP is not correct')
@@ -106,21 +114,35 @@ export class AuthService {
         }
     }
 
-    async logout(userId: string) {
+    async logoutU(userId: string) {
         return this.usersService.update(userId, { refreshToken: null })
     }
 
-    async updateRefreshToken(userId: string, refreshToken: string) {
+    async logoutD(Id: string) {
+        return this.driverService.update(Id, { refreshToken: null })
+    }
+
+    async logoutA(Id: string) {
+        return this.adminService.update(Id, { refreshToken: null })
+    }
+
+    async updateRefreshTokenU(userId: string, refreshToken: string) {
         await this.usersService.update(userId, { refreshToken: refreshToken })
     }
 
-    async getTokens(userId: string, phone: string, fullName: string) {
+    async updateRefreshTokenD(Id: string, refreshToken: string) {
+        await this.driverService.update(Id, { refreshToken: refreshToken })
+    }
+    
+    async updateRefreshTokenA(Id: string, refreshToken: string) {
+        await this.adminService.update(Id, { refreshToken: refreshToken })
+    }
+
+    async getTokens(userId: string) {
         const [ accessToken, refreshToken ] = await Promise.all([
             this.jwtService.signAsync(
                 {
-                    sub: userId,
-                    phone,
-                    fullName
+                    sub: userId
                 },
                 {
                     secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
@@ -129,9 +151,7 @@ export class AuthService {
             ),
             this.jwtService.signAsync(
                 {
-                    sub: userId,
-                    phone,
-                    fullName
+                    sub: userId
                 },
                 {
                     secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
@@ -147,20 +167,70 @@ export class AuthService {
     }
 
 
-    async refreshTokens(userId: string, refreshToken: string) {
+    async refreshTokensU(userId: string, refreshToken: string) {
         const user = await this.usersService.findById(userId);
         if (!user || !user.refreshToken)
           throw new ForbiddenException('Access Denied');
         const refreshTokenMatches = user.refreshToken === refreshToken
         if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
-        const tokens = await this.getTokens(user._id, user.phone, user.fullname);
-        await this.updateRefreshToken(user._id, tokens.refreshToken);
+        const tokens = await this.getTokens(user._id);
+        await this.updateRefreshTokenU(user._id, tokens.refreshToken);
         return { ...tokens};
       
     }
 
-    async getUserFromAuthenticationToken(){
+    async refreshTokensD(Id: string, refreshToken: string) {
+        const driver = await this.driverService.findById(Id);
+        if (!driver || !driver.refreshToken)
+          throw new ForbiddenException('Access Denied');
+        const refreshTokenMatches = driver.refreshToken === refreshToken
+        if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+        const tokens = await this.getTokens(driver._id);
+        await this.updateRefreshTokenD(driver._id, tokens.refreshToken);
+        return { ...tokens};
+    }
 
+    async refreshTokensA(Id: string, refreshToken: string) {
+        const admin = await this.adminService.findById(Id);
+        if (!admin || !admin.refreshToken)
+          throw new ForbiddenException('Access Denied');
+        const refreshTokenMatches = admin.refreshToken === refreshToken
+        if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+        const tokens = await this.getTokens(admin._id);
+        await this.updateRefreshTokenA(admin._id, tokens.refreshToken);
+        return { ...tokens};
+    }
+
+    async driverSignup(createDriverDto: CreateDriverDto, files: filesUploadDTO): Promise<any> {
+        const driver = await this.driverService.findByPhone(createDriverDto.phone);
+        if(driver) throw new NotFoundException('Phone of driver already exists');
+
+        const passwordHash = await argon2.hash(createDriverDto.password);
+
+        this.driverService.create({...createDriverDto,password:passwordHash}, files);
+
+        const token = this.getTokens(driver._id);
+        return token;
+    }
+
+    async driverSignin(dto: AuthDto_pass_driver) {
+        const driver = await this.driverService.findByPhone(dto.phone);
+        if(!driver) throw new NotFoundException('Driver does not exist');
+        const isPasswordValid = await argon2.verify(driver.password, dto.password);
+        if (!isPasswordValid) throw new UnauthorizedException('Invalid password');
+        const tokens = await this.getTokens(driver._id);
+        await this.updateRefreshTokenD(driver._id, tokens.refreshToken);
+        return { ...tokens };
+    }
+
+    async adminSignin(dto: AuthDto_pass_admin) {
+        const admin = await this.adminService.findByUsername(dto.username);
+        if(!admin) throw new NotFoundException('Admin does not exist');
+        const isPasswordValid = admin.password === dto.password;
+        if (!isPasswordValid) throw new UnauthorizedException('Invalid password');
+        const tokens = await this.getTokens(admin._id);
+        await this.updateRefreshTokenA(admin._id, tokens.refreshToken);
+        return { ...tokens };
     }
 
 }

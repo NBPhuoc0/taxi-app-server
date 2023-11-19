@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import { UserDto } from './dto/create-user.dto';
-import { AzureStorageService } from 'src/utils/auzre/storage-blob.service';
+import { AzureStorageService } from '../utils/auzre/storage-blob.service';
 
 
 @Injectable()
@@ -39,15 +39,15 @@ export class UsersService {
     }
 
     async findById_location(id: string): Promise<UserDocument> {
-        const user = await this.userModel.findById(id).select('location').exec()
+        const location = await this.userModel.findById(id).select('location').exec()
 
-        if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
+        if (!location) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
 
-        return user
+        return location
     }
 
     async findByPhone(phone: string): Promise<UserDocument> {
-        const user = await this.userModel.findOne({ phone }).exec()
+        const user = await this.userModel.findOne({ phone:phone }).exec()
 
         if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
 

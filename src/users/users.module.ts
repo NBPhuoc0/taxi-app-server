@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { UserSchema } from './schemas/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AzureStorageModule } from 'src/utils/auzre/storage-blob.module';
+import { AzureStorageModule } from '../utils/auzre/storage-blob.module';
 
 @Module({
   imports: [
