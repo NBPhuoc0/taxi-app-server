@@ -1,26 +1,100 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Driver, DriverDocument } from './schemas/driver.schema';
+import { Model } from 'mongoose';
+import { AzureStorageService } from '../utils/auzre/storage-blob.service';
+import { location } from '../utils/interface/location.interface';
+import {  filesUploadDTO } from './dto/files.dto';
 
 @Injectable()
 export class DriversService {
-  create(createDriverDto: CreateDriverDto) {
-    return 'This action adds a new driver';
+  constructor(
+    @InjectModel(Driver.name) 
+    private driverModel: Model<DriverDocument>,
+    private azureStorage: AzureStorageService
+) {}
+
+  logger = new Logger('DriversService');
+
+
+  async create(createDriverDto: CreateDriverDto, files: filesUploadDTO) {
+    try {
+      const newDriver = await new this.driverModel(createDriverDto);
+
+      const avatarURL = await this.azureStorage.uploadFile(files.avatar[0], 'driveravatar', newDriver._id);
+      const vehicleImageURL = await this.azureStorage.uploadFile(files.vehicleImage[0], 'vehicleimage', newDriver._id);
+      const Cavet_fURL = await this.azureStorage.uploadFile(files.Cavet_f[0], 'cavetf', newDriver._id);
+      const Cavet_bURL = await this.azureStorage.uploadFile(files.Cavet_b[0], 'cavetb', newDriver._id);
+      const identification_card_fURL = await this.azureStorage.uploadFile(files.identification_card_f[0], 'identificationcardf', newDriver._id);
+      const identification_card_bURL = await this.azureStorage.uploadFile(files.identification_card_b[0], 'identificationcardb', newDriver._id);
+      const license_image_fURL = await this.azureStorage.uploadFile(files.license_image_f[0], 'licenseimagef', newDriver._id);
+      const license_image_bURL = await this.azureStorage.uploadFile(files.license_image_b[0], 'licenseimageb', newDriver._id);
+
+      newDriver.avatar = avatarURL; 
+      newDriver.vehicleImage = vehicleImageURL;
+      newDriver.Cavet_f = Cavet_fURL;
+      newDriver.Cavet_b = Cavet_bURL;
+      newDriver.identification_card_f = identification_card_fURL;
+      newDriver.identification_card_b = identification_card_bURL;
+      newDriver.license_image_f = license_image_fURL;
+      newDriver.license_image_b = license_image_bURL;
+      
+      return await newDriver.save();
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  
   }
 
-  findAll() {
-    return `This action returns all drivers`;
+
+  async findByPhone(phone: string): Promise<DriverDocument> {
+    const driver = this.driverModel.findOne({ phone:phone }).exec()
+
+    return driver
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} driver`;
+  async findById(id: string): Promise<DriverDocument> {
+    const driver = this.driverModel.findById(id).exec()
+
+    return driver
   }
 
-  update(id: number, updateDriverDto: UpdateDriverDto) {
-    return `This action updates a #${id} driver`;
+  async update(id: string, updateDriverDto: UpdateDriverDto): Promise<DriverDocument> {
+    const driver = await this.driverModel.findByIdAndUpdate(id, updateDriverDto, { new: true }).exec()
+
+    return driver
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} driver`;
+  async updateLocation(id: string, location: location): Promise<DriverDocument> {
+    const driver = await this.driverModel.findByIdAndUpdate(id, { location: location }, { new: true }).exec()
+
+    return driver
   }
+
+  async findById_location(id: string): Promise<DriverDocument> {
+    const location = await this.driverModel.findById(id).select('location').exec()
+
+    return location
+  }
+
+  async verify(id: string,status : boolean): Promise<DriverDocument> {
+    const driver = await this.driverModel.findByIdAndUpdate(id, { isVerified: status}, { new: true }).exec()
+    
+    return driver
+  }
+
+  
+  async remove(id: string): Promise<DriverDocument> {
+    const driver = await this.driverModel.findByIdAndDelete(id).exec()
+
+    if (!driver) throw new HttpException('Driver not found', HttpStatus.NOT_FOUND)
+
+    return driver
+  }
+
+
+
+
 }
