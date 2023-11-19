@@ -3,10 +3,11 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import mongodbConfig from './utils/mongodb.config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ChatModule } from './chat/chat.module';
+import { ChatsModule } from './chats/chats.module';
 import { AuthModule } from './auth/auth.module';
 import { OrdersModule } from './orders/orders.module';
 import { DriversModule } from './drivers/drivers.module';
+import { AzureStorageModule } from './utils/auzre/storage-blob.module';
 
 @Module({
   imports: [
@@ -22,10 +23,12 @@ import { DriversModule } from './drivers/drivers.module';
       inject: [ConfigService],
     }),
     UsersModule,
-    ChatModule,
+    ChatsModule,
     AuthModule,
     OrdersModule,
-    DriversModule, ],
+    DriversModule,
+    AzureStorageModule
+   ],
   controllers: [],
   providers: [],
 })
@@ -33,7 +36,7 @@ export class AppModule {
   static port: number | string;
 
   constructor(private configService: ConfigService) {
-    AppModule.port = process.env.PORT || 8080;
+    AppModule.port = configService.get('PORT') || 8080;
   }
 
   static getBaseUrl(app: INestApplication): string {

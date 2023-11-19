@@ -4,6 +4,10 @@ import { OderStatus } from "../enum/oderstatus.enum";
 
 export type OderDocument = Oder & Document;
 
+class location {
+    lat: number ;
+    long: number ;
+}
 
 @Schema({
     toJSON: {
@@ -20,10 +24,16 @@ export class Oder {
     oderTotal: number
 
     @Prop({ required: true })
-    source: string
+    source_address: string
+
+    @Prop({})
+    source_location: location
 
     @Prop({ required: true })
-    destination: string
+    destination_address: string
+
+    @Prop({})
+    destination_location: location
 
     @Prop({ required: true, ref: 'Driver' })
     driver: string

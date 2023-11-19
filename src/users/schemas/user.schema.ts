@@ -27,6 +27,9 @@ export class User {
 
     @Prop()
     refreshToken: string
+
+    @Prop()
+    avatar: string
 }
 
 
