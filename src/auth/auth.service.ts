@@ -45,7 +45,7 @@ export class AuthService {
                 ...createUserDto,
             })
         
-            const tokens = await this.getTokens(newUser._id)
+            const tokens = await this.getTokens(newUser._id, 'user')
             await this.updateRefreshTokenU(newUser._id, tokens.refreshToken)
             return { ...tokens }
         } else {
@@ -68,7 +68,7 @@ export class AuthService {
     async signInOTP_verify(authDto: AuthDto_verify) {
         if (await this.verifyOTP(authDto.phone, authDto.code)) {
             const user = await this.usersService.findByPhone(authDto.phone)
-            const tokens = await this.getTokens(user._id)
+            const tokens = await this.getTokens(user._id, 'user')
             await this.updateRefreshTokenU(user._id, tokens.refreshToken)
             return { ...tokens }
         } else {
@@ -138,11 +138,12 @@ export class AuthService {
         await this.adminService.update(Id, { refreshToken: refreshToken })
     }
 
-    async getTokens(userId: string) {
+    async getTokens(userId: string,role: string) {
         const [ accessToken, refreshToken ] = await Promise.all([
             this.jwtService.signAsync(
                 {
-                    sub: userId
+                    sub: userId,
+                    role: role
                 },
                 {
                     secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
@@ -151,7 +152,8 @@ export class AuthService {
             ),
             this.jwtService.signAsync(
                 {
-                    sub: userId
+                    sub: userId,
+                    role: role
                 },
                 {
                     secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
@@ -173,7 +175,7 @@ export class AuthService {
           throw new ForbiddenException('Access Denied');
         const refreshTokenMatches = user.refreshToken === refreshToken
         if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
-        const tokens = await this.getTokens(user._id);
+        const tokens = await this.getTokens(user._id, 'user');
         await this.updateRefreshTokenU(user._id, tokens.refreshToken);
         return { ...tokens};
       
@@ -185,7 +187,7 @@ export class AuthService {
           throw new ForbiddenException('Access Denied');
         const refreshTokenMatches = driver.refreshToken === refreshToken
         if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
-        const tokens = await this.getTokens(driver._id);
+        const tokens = await this.getTokens(driver._id,'driver');
         await this.updateRefreshTokenD(driver._id, tokens.refreshToken);
         return { ...tokens};
     }
@@ -196,7 +198,7 @@ export class AuthService {
           throw new ForbiddenException('Access Denied');
         const refreshTokenMatches = admin.refreshToken === refreshToken
         if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
-        const tokens = await this.getTokens(admin._id);
+        const tokens = await this.getTokens(admin._id,'admin');
         await this.updateRefreshTokenA(admin._id, tokens.refreshToken);
         return { ...tokens};
     }
@@ -209,7 +211,7 @@ export class AuthService {
 
         this.driverService.create({...createDriverDto,password:passwordHash}, files);
 
-        const token = this.getTokens(driver._id);
+        const token = this.getTokens(driver._id,'driver');
         return token;
     }
 
@@ -218,7 +220,7 @@ export class AuthService {
         if(!driver) throw new NotFoundException('Driver does not exist');
         const isPasswordValid = await argon2.verify(driver.password, dto.password);
         if (!isPasswordValid) throw new UnauthorizedException('Invalid password');
-        const tokens = await this.getTokens(driver._id);
+        const tokens = await this.getTokens(driver._id, 'driver');
         await this.updateRefreshTokenD(driver._id, tokens.refreshToken);
         return { ...tokens };
     }
@@ -228,9 +230,20 @@ export class AuthService {
         if(!admin) throw new NotFoundException('Admin does not exist');
         const isPasswordValid = admin.password === dto.password;
         if (!isPasswordValid) throw new UnauthorizedException('Invalid password');
-        const tokens = await this.getTokens(admin._id);
+        const tokens = await this.getTokens(admin._id, 'admin');
         await this.updateRefreshTokenA(admin._id, tokens.refreshToken);
         return { ...tokens };
+    }
+
+    async driverPasswordReset(phone: string, password: string) {
+        const driver = await this.driverService.findByPhone(phone);
+        if(!driver) throw new NotFoundException('Driver does not exist');
+        // const isPasswordValid = await argon2.verify(driver.password, dto.password);
+        // if (!isPasswordValid) throw new UnauthorizedException('Invalid password');
+        // this.logger.log(driver.toJSON());
+        const passwordHash = await argon2.hash(password);
+        await this.driverService.update(driver._id, {password: passwordHash});
+        return 'Password reset successfully';
     }
 
 }
