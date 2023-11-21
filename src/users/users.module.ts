@@ -4,12 +4,14 @@ import { UsersController } from './users.controller';
 import { UserSchema } from './schemas/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AzureStorageModule } from '../utils/auzre/storage-blob.module';
+import { OrdersModule } from 'src/orders/orders.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'User',schema: UserSchema, },
     ]),
+    OrdersModule,
     AzureStorageModule
   ],
   controllers: [UsersController],

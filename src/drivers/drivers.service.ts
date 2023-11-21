@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { AzureStorageService } from '../utils/auzre/storage-blob.service';
 import { location } from '../utils/interface/location.interface';
 import {  filesUploadDTO } from './dto/files.dto';
+import { Status } from 'src/utils/enums/driverstatus.enum';
 
 @Injectable()
 export class DriversService {
@@ -85,6 +86,11 @@ export class DriversService {
     return driver
   }
 
+  async updateStatus(id: string, status: Status): Promise<DriverDocument> {
+    const driver = await this.driverModel.findByIdAndUpdate(id, { status: status}, { new: true }).exec()
+    
+    return driver
+  }
   
   async remove(id: string): Promise<DriverDocument> {
     const driver = await this.driverModel.findByIdAndDelete(id).exec()
@@ -94,7 +100,7 @@ export class DriversService {
     return driver
   }
 
-
+  
 
 
 }

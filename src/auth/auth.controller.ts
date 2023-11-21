@@ -2,7 +2,6 @@ import { ApiTags, ApiBody, ApiCreatedResponse, ApiBearerAuth, ApiOkResponse, Api
 import { AuthService } from './auth.service';
 import { Body, Controller, Get, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import RequestWithUser from '../utils/interface/requestWithUser.interface';
-import { AccessTokenGuard } from '../utils/guards/accessToken.guard';
 import { RefreshTokenGuard } from '../utils/guards/refreshToken.guard';
 import { AuthDto_send } from './dto/auth_send.dto';
 import { AuthDto_verify } from './dto/auth_verify.dto';
@@ -15,6 +14,9 @@ import { AuthDto_pass_driver } from './dto/auth_pass_driver.dto';
 import RequestWithDriver from 'src/utils/interface/requestWithDriver.interface';
 import RequestWithAdmin from 'src/utils/interface/requestWithAdmin.interface';
 import { AuthDto_pass_admin } from './dto/auth_pass_admin.dto';
+import { AccessTokenGuardD } from 'src/utils/guards/accessTokenD.guard';
+import { AccessTokenGuardA } from 'src/utils/guards/accessTokenA.guard';
+import { AccessTokenGuardU } from 'src/utils/guards/accessTokenU.guard';
 
 @Controller('auth')
 @ApiBearerAuth()
@@ -84,7 +86,7 @@ export class AuthController {
         status: 200,
         description: 'returns 200 status and logs a user out',
     })
-    @UseGuards(AccessTokenGuard)
+    @UseGuards(AccessTokenGuardU)
     @Get('user/logout')
     logout(@Req() req: RequestWithUser) {
       this.authService.logoutU(req.user['sub']);
@@ -125,16 +127,21 @@ export class AuthController {
       return this.authService.driverSignin(data);
     }
 
-    @UseGuards(AccessTokenGuard)
+    @Post('driver/passwordreset')
+    password_reset_driver(@Body() data: any) {
+      return this.authService.driverPasswordReset(data.phone, data.password);
+    }
+
+    @UseGuards(AccessTokenGuardD)
     @Get('driver/logout')
     logout_driver(@Req() req: RequestWithDriver) {
-      this.authService.logoutD(req.driver['sub']);
+      this.authService.logoutD(req.user['sub']);
     }
 
     @UseGuards(RefreshTokenGuard)
     @Get('driver/refresh')
     async refreshTokens_driver(@Req() req: RequestWithDriver) {
-        const userId = req.driver['sub'];
+        const userId = req.user['sub'];
         const refreshToken = req.user['refreshToken'];
         return await this.authService.refreshTokensD(userId, refreshToken)
     }
@@ -144,16 +151,16 @@ export class AuthController {
       return this.authService.adminSignin(data);
     }
 
-    @UseGuards(AccessTokenGuard)
+    @UseGuards(AccessTokenGuardA)
     @Get('admin/logout')
     logout_admin(@Req() req: RequestWithAdmin) {
-      this.authService.logoutA(req.admin['sub']);
+      this.authService.logoutA(req.user['sub']);
     }
 
     @UseGuards(RefreshTokenGuard)
     @Get('admin/refresh')
     async refreshTokens_admin(@Req() req: RequestWithAdmin) {
-        const userId = req.admin['sub'];
+        const userId = req.user['sub'];
         const refreshToken = req.user['refreshToken'];
         return await this.authService.refreshTokensA(userId, refreshToken)
     }
