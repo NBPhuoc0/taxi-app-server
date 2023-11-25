@@ -33,7 +33,7 @@ export class AdminController {
     description: 'returns User ',
   })
   @Get('users/filter')
-  async getAllUsers(@Query() query: FilterUserDto): Promise<User[]> {
+  async getAllUsers(@Query() query: FilterUserDto) {
     return this.userService.findUsers(query);
   }
 }

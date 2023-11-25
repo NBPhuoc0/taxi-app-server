@@ -1,5 +1,5 @@
 import { UpdateUserDto } from './dto/update-user.dto';
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, Res } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
@@ -30,8 +30,8 @@ export class UsersService {
     }
 
 
-    async findUsers(query: FilterUserDto): Promise<UserDocument[]> {
-        const limit = Number(query.limit) > 100 ? 100 : ( Number(query.limit) < 10 ? 10 : Number(query.limit) );
+    async findUsers(query: FilterUserDto) {
+        const limit = Number(query.limit) > 100 ? 100 : ( Number(query.limit) < 10 ? 10 : Number(query.limit) ) || 10;
         const currentPage = Number(query.page) || 1;
         const skip = limit * (currentPage - 1);
     
@@ -50,11 +50,18 @@ export class UsersService {
                 }
             }: {};
         const users = await this.userModel
-          .find({ ...searchByName })
-          .find({ ...searchByPhone })
-          .limit(limit)
-          .skip(skip);
-        return users;
+            .find({ ...searchByName })
+            .find({ ...searchByPhone })
+            .limit(limit)
+            .skip(skip);
+
+        return {
+            totalElements: users.length,
+            offset: skip,
+            currentPage: currentPage,
+            pageSize: Math.ceil(users.length / limit),
+            content: users
+        };
     }
 
     async findById(id: string): Promise<UserDocument> {
