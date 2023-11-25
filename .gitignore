@@ -36,4 +36,4 @@ lerna-debug.log*
 .vercel
 .env
 .vercel
-.yarn
+yarn.lock
