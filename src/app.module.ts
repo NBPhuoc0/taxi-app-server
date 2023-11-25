@@ -10,6 +10,7 @@ import { DriversModule } from './drivers/drivers.module';
 import { AzureStorageModule } from './utils/auzre/storage-blob.module';
 import { SocketModule } from './socket/socket.module';
 import { AdminModule } from './admin/admin.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -24,6 +25,15 @@ import { AdminModule } from './admin/admin.module';
       }),
       inject: [ConfigService],
     }),
+    EventEmitterModule.forRoot(
+      {
+        wildcard: true,
+        delimiter: '.',
+        maxListeners: 10,
+        verboseMemoryLeak: true,
+        ignoreErrors: false,
+      }
+    ),
     UsersModule,
     SocketModule,
     AuthModule,

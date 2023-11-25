@@ -1,52 +1,57 @@
-import { Controller, Get, Post, Param, Delete, Logger, UseGuards, UseInterceptors, UploadedFile, Req, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, Logger, UseGuards, UseInterceptors, UploadedFile, Req, Patch, Body } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { AccessTokenGuard } from '../utils/guards/accessToken.guard';
+import { AccessTokenGuardU } from '../utils/guards/accessTokenU.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import RequestWithUser from '../utils/interface/requestWithUser.interface';
+import { OrdersService } from 'src/orders/orders.service';
+import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
 
 @ApiTags('Users')
 @Controller('users')
 @ApiBearerAuth()
+@UseGuards(AccessTokenGuardU)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly ordersService: OrdersService,
+  ) {
   } 
 
   @ApiOkResponse({
     status: 200,
     description: 'returns User ',
   })
-  @UseGuards(AccessTokenGuard)
-  @Get('me')
+  @Get()
   getCurrentUser(@Req() req: RequestWithUser) {
-    const user = this.usersService.findById(req.user['sub'])
-    return user
+    return this.usersService.findById(req.user['sub'])
   }
 
 
   @Patch('update/avatar')
-  @UseGuards(AccessTokenGuard)
   @UseInterceptors(FileInterceptor('file'))
   updateAvatar(@UploadedFile() file: Express.Multer.File, @Req() req: RequestWithUser) {
-    
     return this.usersService.updateAvatar(req.user['sub'], file);
   }
 
   @Patch('update/location')
-  @UseGuards(AccessTokenGuard)
   updateLocation(@Req() req: RequestWithUser) {
     return this.usersService.updateLocation(req.user['sub'], req.body);
   }
 
   @Patch('update')
-  @UseGuards(AccessTokenGuard)
   update(@Req() req: RequestWithUser) {
     return this.usersService.update(req.user['sub'], req.body);
   }
 
-  @Get()
-  getAll() {
-    return this.usersService.findAll();
+  @Post('order')
+  createOrder(@Req() req: RequestWithUser, @Body() body: CreateOrderDto) {      
+    return this.ordersService.create(req.user['sub'], req.body);    
+  }
+
+  @Get('order')
+  findOrder(@Req() req: RequestWithUser) {
+    return this.ordersService.findByUser(req.user['sub']);
   }
 
 }
