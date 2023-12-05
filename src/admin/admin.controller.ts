@@ -1,13 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminDto } from './dto/update-admin.dto';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuardA } from 'src/utils/guards/accessTokenA.guard';
 import { UsersService } from 'src/users/users.service';
 import { DriversService } from 'src/drivers/drivers.service';
 import { OrdersService } from 'src/orders/orders.service';
-import { User } from 'src/users/schemas/user.schema';
 import { FilterUserDto } from 'src/users/dto/filter-user.dto';
 
 @Controller('admin')
@@ -30,10 +27,28 @@ export class AdminController {
 
   @ApiOkResponse({
     status: 200,
-    description: 'returns User ',
+    description: 'returns User',
   })
   @Get('users/filter')
   async getAllUsers(@Query() query: FilterUserDto) {
     return this.userService.findUsers(query);
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns User',
+  })
+  @Get('drivers/filter')
+  async getAllDrivers(@Query() query: FilterUserDto) {
+    return this.driverService.findDrivers(query);
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns User ',
+  })
+  @Get('users')
+  getUserByID(@Query() query: {id: string}) {
+    return this.userService.findById(query.id);
   }
 }
