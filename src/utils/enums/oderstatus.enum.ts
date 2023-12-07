@@ -1,4 +1,4 @@
-export const enum OderStatus {
+export const enum OrderStatus {
     PENDING = 'PENDING',
     DRIVERISARRIVING = 'DRIVERISARRIVING',
     INPROGRESS = 'INPROGRESS',

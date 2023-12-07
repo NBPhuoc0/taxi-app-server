@@ -54,7 +54,7 @@ export class UsersService {
             .find({ ...searchByName })
             .find({ ...searchByPhone })
             .limit(limit)
-            .skip(skip);
+            .skip(skip).exec();
         return {
             totalElements: users.length,
             currentPage: currentPage,

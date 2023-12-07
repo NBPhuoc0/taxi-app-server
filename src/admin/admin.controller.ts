@@ -51,4 +51,13 @@ export class AdminController {
   getUserByID(@Query() query: {id: string}) {
     return this.userService.findById(query.id);
   }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns User ',
+  })
+  @Get('orders')
+  getOrdersByUser(@Query() query: {uid: string, src: string, des: string, limit: number, currPage: number}) {
+    return this.orderService.findByUser(query.uid, query.src, query.des, query.limit, query.currPage);;
+  }
 }
