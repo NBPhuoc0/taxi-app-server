@@ -45,7 +45,7 @@ export class OrdersService {
 
     const orders = await this.orderModel.find({...searchConditions}).populate({
       path: 'driver',
-      select: 'fullname phone',
+      select: 'fullname phone avatar',
     })
     .limit(pageSize)
     .skip(skip)
