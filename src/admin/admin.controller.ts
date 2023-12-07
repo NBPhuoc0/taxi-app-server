@@ -56,7 +56,7 @@ export class AdminController {
     status: 200,
     description: 'returns User ',
   })
-  @Get('orders')
+  @Get('orders/filter')
   getOrdersByUser(@Query() query: {uid: string, src: string, des: string, limit: number, currPage: number}) {
     return this.orderService.findByUser(query.uid, query.src, query.des, query.limit, query.currPage);;
   }
