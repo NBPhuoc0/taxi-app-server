@@ -87,4 +87,13 @@ export class AdminController {
   getStatisticByUser(@Query() query) {
     return this.orderService.statisticsByUser(query.id);
   }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns list of orders ',
+  })
+  @Get('orders/drivers/statistics')
+  getStatisticByDriver(@Query() query) {
+    return this.orderService.statisticsByDriver(query.id);
+  }
 }

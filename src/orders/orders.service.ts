@@ -147,11 +147,12 @@ export class OrdersService {
     return totalOrderCancelledgYesterday === 0 ? (totalOrderCancelledToday === 0 ? 0 : 100) : parseFloat((((totalOrderCancelledToday - totalOrderCancelledgYesterday)/totalOrderCancelledgYesterday)*100).toFixed(2));
   }
 
-  async getToTalEarningByID(userID: string){
+  async getToTalEarningByID(userID: string, driverID: string){
+    const query = userID === '' ? {driver: driverID} : {user: userID};
     const totalEarning = await this.orderModel.aggregate([
-      { $match: { user: userID } },
+      { $match: query },
       { $group: {
-          _id: '$user',
+          _id: null,
           total: { $sum: '$orderTotal' }
         }
       }
@@ -166,11 +167,33 @@ export class OrdersService {
     const preDate = date.toISOString().slice(0,10)
 
     const orders = await this.orderModel.find({ user: userID }).count().exec();
-    const totalEarning = await this.getToTalEarningByID(userID);
+    const totalEarning = await this.getToTalEarningByID(userID, '');
     const totalOrderCancelled = await this.orderModel.find({ user: userID, orderStatus: OrderStatus.CANCELLED}).count().exec();
     const orderPercentageChange = await this.getOrderPercentageChange(userID, '', currDate, preDate);
     const earningPercentageChange  = await this.getEarningPercentageChange(userID, '', currDate, preDate);
     const cancelledPercentageChange = await this.getCancelledPercentageChange(userID, '', currDate, preDate);
+    return{
+      totalOrder: orders,
+      orderPercentageChange: orderPercentageChange,
+      totalEarning: totalEarning.length > 0 ? totalEarning[0].total : 0,
+      earningPercentageChange: earningPercentageChange,
+      totalOrderCancelled: totalOrderCancelled,
+      cancelledPercentageChange: cancelledPercentageChange,
+    }
+  }
+
+  async statisticsByDriver(driverID: string){
+    const date = new Date();
+    date.setDate(new Date().getDate()-1);
+    const currDate = new Date().toISOString().slice(0,10);
+    const preDate = date.toISOString().slice(0,10)
+
+    const orders = await this.orderModel.find({ driver: driverID }).count().exec();
+    const totalEarning = await this.getToTalEarningByID('',driverID);
+    const totalOrderCancelled = await this.orderModel.find({ driver: driverID, orderStatus: OrderStatus.CANCELLED}).count().exec();
+    const orderPercentageChange = await this.getOrderPercentageChange('', driverID, currDate, preDate);
+    const earningPercentageChange  = await this.getEarningPercentageChange('', driverID, currDate, preDate);
+    const cancelledPercentageChange = await this.getCancelledPercentageChange('', driverID, currDate, preDate);
     return{
       totalOrder: orders,
       orderPercentageChange: orderPercentageChange,
