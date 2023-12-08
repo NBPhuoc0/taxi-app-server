@@ -16,7 +16,7 @@ export class Order {
     @Prop({ default: OrderStatus.PENDING })
     orderStatus: OrderStatus
 
-    @Prop({ required: true, unique: true })
+    @Prop({ required: true })
     orderTotal: number
 
     @Prop({ required: true })
