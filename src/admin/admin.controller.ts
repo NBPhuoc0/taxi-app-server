@@ -10,7 +10,7 @@ import { FilterUserDto } from 'src/users/dto/filter-user.dto';
 @Controller('admin')
 @ApiBearerAuth()
 @ApiTags('Administration')
-// @UseGuards(AccessTokenGuardA)
+@UseGuards(AccessTokenGuardA)
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
@@ -54,11 +54,29 @@ export class AdminController {
 
   @ApiOkResponse({
     status: 200,
+    description: 'returns Driver ',
+  })
+  @Get('drivers')
+  getDriverByID(@Query() query: {id: string}) {
+    return this.driverService.findById(query.id);
+  }
+
+  @ApiOkResponse({
+    status: 200,
     description: 'returns list of orders ',
   })
-  @Get('orders/filter')
+  @Get('orders/users/filter')
   getOrdersByUser(@Query() query: {uid: string, src: string, des: string, limit: number, currPage: number}) {
     return this.orderService.findByUser(query.uid, query.src, query.des, query.limit, query.currPage);;
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns list of orders ',
+  })
+  @Get('orders/drivers/filter')
+  getOrdersByDriver(@Query() query: {id: string, src: string, des: string, limit: number, currPage: number}) {
+    return this.orderService.findByDriver(query.id, query.src, query.des, query.limit, query.currPage);;
   }
 
   @ApiOkResponse({

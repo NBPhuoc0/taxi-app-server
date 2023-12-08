@@ -34,7 +34,7 @@ export class Order {
     @Prop({ ref: 'Driver' })
     driver: string
 
-    @Prop({ })
+    @Prop({ ref: 'User'})
     user: string
 }
 

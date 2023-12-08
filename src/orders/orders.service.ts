@@ -35,30 +35,6 @@ export class OrdersService {
   //   return this.orderModel.find({ user: id }).exec();
   // }
 
-  async findByUser(uid: string, src?: string, des?: string, limit?: number, currPage?: number) {
-    const pageSize = Number(limit) > 100 ? 100 : ( Number(limit) < 10 ? 10 : Number(limit) ) || 10;
-    const currentPage = Number(currPage) || 1;
-    const skip = limit * (currentPage - 1);
-
-    const searchConditions = {}
-    if (src) searchConditions['source_address'] = { $regex: new RegExp(src, 'i') };    
-    if (des) searchConditions['destination_address'] = { $regex: new RegExp(des, 'i') };    
-
-    const orders = await this.orderModel.find({...searchConditions}).populate({
-      path: 'driver',
-      select: 'fullname phone avatar',
-    })
-    .limit(pageSize)
-    .skip(skip)
-    .exec();
-    return {
-      totalElements: orders.length,
-      currentPage: currentPage,
-      totalPage: Math.ceil(orders.length / pageSize),
-      content: orders
-    }
-  }
-
   async getOrderPercentageChange (userID: string, driverID: string, currDate: string, preDate: string){
     const queryToday = {
       createdAt: {
@@ -182,6 +158,7 @@ export class OrdersService {
     ]).exec();
     return totalEarning;
   }
+
   async statisticsByUser(userID: string){
     const date = new Date();
     date.setDate(new Date().getDate()-1);
@@ -204,8 +181,52 @@ export class OrdersService {
     }
   }
 
-  async findByDriver(id: string) {
-    return this.orderModel.find({ driver: id }).exec();
+  async findByUser(uid: string, src?: string, des?: string, limit?: number, currPage?: number) {
+    const pageSize = Number(limit) > 100 ? 100 : ( Number(limit) < 10 ? 10 : Number(limit) ) || 10;
+    const currentPage = Number(currPage) || 1;
+    const skip = limit * (currentPage - 1);
+
+    const searchConditions = {user: uid}
+    if (src) searchConditions['source_address'] = { $regex: new RegExp(src, 'i') };    
+    if (des) searchConditions['destination_address'] = { $regex: new RegExp(des, 'i') };    
+
+    const orders = await this.orderModel.find({...searchConditions}).populate({
+      path: 'driver',
+      select: 'fullname phone avatar',
+    })
+    .limit(pageSize)
+    .skip(skip)
+    .exec();
+    return {
+      totalElements: orders.length,
+      currentPage: currentPage,
+      totalPage: Math.ceil(orders.length / pageSize),
+      content: orders
+    }
+  }
+
+  async findByDriver(id: string, src?: string, des?: string, limit?: number, currPage?: number) {
+    const pageSize = Number(limit) > 100 ? 100 : ( Number(limit) < 10 ? 10 : Number(limit) ) || 10;
+    const currentPage = Number(currPage) || 1;
+    const skip = limit * (currentPage - 1);
+
+    const searchConditions = {driver: id}
+    if (src) searchConditions['source_address'] = { $regex: new RegExp(src, 'i') };    
+    if (des) searchConditions['destination_address'] = { $regex: new RegExp(des, 'i') };    
+
+    const orders = await this.orderModel.find({...searchConditions}).populate({
+      path: 'user',
+      select: 'fullname phone avatar',
+    })
+    .limit(pageSize)
+    .skip(skip)
+    .exec();
+    return {
+      totalElements: orders.length,
+      currentPage: currentPage,
+      totalPage: Math.ceil(orders.length / pageSize),
+      content: orders
+    }
   }
 
   async findAll() {
