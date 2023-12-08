@@ -10,7 +10,7 @@ import { FilterUserDto } from 'src/users/dto/filter-user.dto';
 @Controller('admin')
 @ApiBearerAuth()
 @ApiTags('Administration')
-@UseGuards(AccessTokenGuardA)
+// @UseGuards(AccessTokenGuardA)
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
@@ -54,10 +54,19 @@ export class AdminController {
 
   @ApiOkResponse({
     status: 200,
-    description: 'returns User ',
+    description: 'returns list of orders ',
   })
   @Get('orders/filter')
   getOrdersByUser(@Query() query: {uid: string, src: string, des: string, limit: number, currPage: number}) {
     return this.orderService.findByUser(query.uid, query.src, query.des, query.limit, query.currPage);;
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns list of orders ',
+  })
+  @Get('orders/users/statistics')
+  getStatisticByUser(@Query() query) {
+    return this.orderService.statisticsByUser(query.id);
   }
 }
