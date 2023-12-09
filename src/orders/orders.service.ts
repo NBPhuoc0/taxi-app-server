@@ -219,6 +219,7 @@ export class OrdersService {
     if (src) searchConditions['source_address'] = { $regex: new RegExp(src, 'i') };    
     if (des) searchConditions['destination_address'] = { $regex: new RegExp(des, 'i') };    
 
+    const totalElements = await this.orderModel.find().count().exec();
     const orders = await this.orderModel.find({...searchConditions}).populate({
       path: 'driver',
       select: 'fullname phone avatar',
@@ -227,9 +228,9 @@ export class OrdersService {
     .skip(skip)
     .exec();
     return {
-      totalElements: orders.length,
+      totalElements: totalElements,
       currentPage: currentPage,
-      totalPage: Math.ceil(orders.length / pageSize),
+      totalPage: Math.ceil(totalElements / pageSize),
       content: orders
     }
   }
