@@ -6,6 +6,7 @@ import { UsersService } from 'src/users/users.service';
 import { DriversService } from 'src/drivers/drivers.service';
 import { OrdersService } from 'src/orders/orders.service';
 import { FilterUserDto } from 'src/users/dto/filter-user.dto';
+import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
 
 @Controller('admin')
 @ApiBearerAuth()
@@ -25,24 +26,7 @@ export class AdminController {
     return this.adminService.create(createAdminDto);
   }
 
-  @ApiOkResponse({
-    status: 200,
-    description: 'returns User',
-  })
-  @Get('users/filter')
-  async getAllUsers(@Query() query: FilterUserDto) {
-    return this.userService.findUsers(query);
-  }
-
-  @ApiOkResponse({
-    status: 200,
-    description: 'returns User',
-  })
-  @Get('drivers/filter')
-  async getAllDrivers(@Query() query: FilterUserDto) {
-    return this.driverService.findDrivers(query);
-  }
-
+  // USER
   @ApiOkResponse({
     status: 200,
     description: 'returns User ',
@@ -54,6 +38,25 @@ export class AdminController {
 
   @ApiOkResponse({
     status: 200,
+    description: 'returns User',
+  })
+  @Get('users/filter')
+  async getAllUsers(@Query() query: FilterUserDto) {
+    return this.userService.findUsers(query);
+  }
+
+  // DRIVER
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns User',
+  })
+  @Get('drivers/filter')
+  async getAllDrivers(@Query() query: FilterUserDto) {
+    return this.driverService.findDrivers(query);
+  }
+
+  @ApiOkResponse({
+    status: 200,
     description: 'returns Driver ',
   })
   @Get('drivers')
@@ -61,6 +64,7 @@ export class AdminController {
     return this.driverService.findById(query.id);
   }
 
+  // ORDER
   @ApiOkResponse({
     status: 200,
     description: 'returns list of orders ',
@@ -95,5 +99,14 @@ export class AdminController {
   @Get('orders/drivers/statistics')
   getStatisticByDriver(@Query() query) {
     return this.orderService.statisticsByDriver(query.id);
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'return order',
+  })
+  @Post('order')
+  createOrder(@Body() order: CreateOrderDto,@Body('userID') userID: string) {
+    return this.orderService.createByAdmin(userID, order);
   }
 }

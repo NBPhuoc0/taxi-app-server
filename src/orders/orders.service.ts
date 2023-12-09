@@ -27,6 +27,12 @@ export class OrdersService {
     return order;
   }
 
+  async createByAdmin(id:string, createOrderDto: CreateOrderDto) {
+    const newOrder = {...createOrderDto, user: id}
+    const order = new this.orderModel(newOrder);
+    return order.save();
+  }
+
   async findByid(id: string) {
     return this.orderModel.findById(id).exec();
   }
