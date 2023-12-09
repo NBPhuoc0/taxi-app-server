@@ -244,7 +244,7 @@ export class OrdersService {
     if (src) searchConditions['source_address'] = { $regex: new RegExp(src, 'i') };    
     if (des) searchConditions['destination_address'] = { $regex: new RegExp(des, 'i') };    
 
-    const totalElements = await this.orderModel.find().count().exec();
+    const totalElements = await this.orderModel.find({ driver: id }).count().exec();
     const orders = await this.orderModel.find({...searchConditions}).populate({
       path: 'user',
       select: 'fullname phone avatar',
