@@ -11,7 +11,7 @@ import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
 @Controller('admin')
 @ApiBearerAuth()
 @ApiTags('Administration')
-// @UseGuards(AccessTokenGuardA)
+@UseGuards(AccessTokenGuardA)
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
