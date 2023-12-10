@@ -7,17 +7,19 @@ import { DriversService } from 'src/drivers/drivers.service';
 import { OrdersService } from 'src/orders/orders.service';
 import { FilterUserDto } from 'src/users/dto/filter-user.dto';
 import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
+import { TwilioService } from 'nestjs-twilio';
 
 @Controller('admin')
-@ApiBearerAuth()
+// @ApiBearerAuth()
 @ApiTags('Administration')
-@UseGuards(AccessTokenGuardA)  
+// @UseGuards(AccessTokenGuardA)  
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly userService: UsersService,
     private readonly driverService: DriversService,
     private readonly orderService: OrdersService,
+    private readonly twilioService: TwilioService,
   ) {}
 
 
@@ -126,5 +128,23 @@ export class AdminController {
   @Get('orders/details')
   getOrderDetails(@Query() query: { id: string }) {
     return this.orderService.findByid(query.id);
+  }
+
+  @Post('sms')
+  sendSMS(@Body() body: {phone: string, message: string}) {
+    try {
+      return this.twilioService.client.messages.create(
+        {
+          body: body.message,
+          from: '+12023189346',
+          to: body.phone,
+          // Body: "hé looo"
+          // From: "+12023189346"
+          // To: "+84333495017"
+        },
+      );
+    } catch (error) {
+      return error;
+    }
   }
 }

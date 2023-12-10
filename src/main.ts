@@ -4,6 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from './utils/swagger';
 import helmet from 'helmet';
 import { HttpExceptionFilter } from './utils/filters/http-exception.filter';
+import { WSExceptionFilter } from './utils/filters/ws-exception.filter';
 // import { AzureSocketIO } from './chat/adapters/azure-pubsub.adapter';
 
 async function bootstrap() {
