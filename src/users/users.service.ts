@@ -49,19 +49,18 @@ export class UsersService {
                     $regex: query.phone,
                 }
             }: {};
+
         const users = await this.userModel
             .find({ ...searchByName })
             .find({ ...searchByPhone })
             .limit(limit)
-            .skip(skip);
-
+            .skip(skip).exec();
         return {
             totalElements: users.length,
-            offset: skip,
             currentPage: currentPage,
-            pageSize: Math.ceil(users.length / limit),
+            totalPage: Math.ceil(users.length / limit),
             content: users
-        };
+        }
     }
 
     async findById(id: string): Promise<UserDocument> {
