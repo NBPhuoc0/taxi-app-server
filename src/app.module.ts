@@ -19,7 +19,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       load: [mongodbConfig]
     }), 
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
       useFactory: async (mongodbConfig: ConfigService) => ({
         uri: mongodbConfig.get<string>('mongodb.uri'),
       }),
@@ -49,7 +48,7 @@ export class AppModule {
   static port: number | string;
 
   constructor(private configService: ConfigService) {
-    AppModule.port = configService.get('PORT') || 8080;
+    AppModule.port = configService.get<string>('PORT') || 8080;
   }
 
   static getBaseUrl(app: INestApplication): string {
