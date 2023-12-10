@@ -10,9 +10,9 @@ import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
 import { TwilioService } from 'nestjs-twilio';
 
 @Controller('admin')
-@ApiBearerAuth()
+// @ApiBearerAuth()
 @ApiTags('Administration')
-@UseGuards(AccessTokenGuardA)  
+// @UseGuards(AccessTokenGuardA)  
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
@@ -130,16 +130,21 @@ export class AdminController {
     return this.orderService.findByid(query.id);
   }
 
+  @Post('sms')
   sendSMS(@Body() body: {phone: string, message: string}) {
-    return this.twilioService.client.messages.create(
-      {
-        body: body.message,
-        from: '+12023189346',
-        to: body.phone,
-        // Body: "hé looo"
-        // From: "+12023189346"
-        // To: "+84333495017"
-      },
-    );
+    try {
+      return this.twilioService.client.messages.create(
+        {
+          body: body.message,
+          from: '+12023189346',
+          to: body.phone,
+          // Body: "hé looo"
+          // From: "+12023189346"
+          // To: "+84333495017"
+        },
+      );
+    } catch (error) {
+      return error;
+    }
   }
 }

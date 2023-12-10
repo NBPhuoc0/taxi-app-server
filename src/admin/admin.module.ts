@@ -7,7 +7,7 @@ import { UsersModule } from 'src/users/users.module';
 import { DriversModule } from 'src/drivers/drivers.module';
 import { OrdersModule } from 'src/orders/orders.module';
 import { TwilioModule } from 'nestjs-twilio';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
