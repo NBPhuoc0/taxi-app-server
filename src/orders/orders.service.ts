@@ -34,12 +34,11 @@ export class OrdersService {
   }
 
   async findByid(id: string) {
-    return this.orderModel.findById(id).exec();
+    return await this.orderModel.findById(id).populate({
+      path: 'user driver',
+      select: 'fullname phone avatar vehicleImage',
+    }).exec();
   }
-
-  // async findByUser(id: string) {
-  //   return this.orderModel.find({ user: id }).exec();
-  // }
 
   async getOrderPercentageChange (userID: string, driverID: string, currDate: string, preDate: string){
     const queryToday = {
@@ -252,6 +251,28 @@ export class OrdersService {
     .limit(pageSize)
     .skip(skip)
     .exec();
+    return {
+      totalElements: totalElements,
+      currentPage: currentPage,
+      totalPage: Math.ceil(totalElements / pageSize),
+      content: orders
+    }
+  }
+
+  async findOrders(src?: string, des?: string, orderStatus?: string, limit?: number, currPage?: number) {
+    const pageSize = Number(limit) > 100 ? 100 : ( Number(limit) < 10 ? 10 : Number(limit) ) || 10;
+    const currentPage = Number(currPage) || 1;
+    const skip = limit * (currentPage - 1);
+    const searchConditions = {}
+    if (orderStatus) searchConditions['orderStatus'] = { $regex: new RegExp(orderStatus, 'i') }; 
+    if (src) searchConditions['source_address'] = { $regex: new RegExp(src, 'i') };    
+    if (des) searchConditions['destination_address'] = { $regex: new RegExp(des, 'i') };   
+
+    const totalElements = await this.orderModel.find({...searchConditions}).count().exec();
+    const orders = await this.orderModel.find({...searchConditions}).populate({
+      path: 'user driver',
+      select: 'fullname phone avatar'
+    }).limit(pageSize).skip(skip).exec();
     return {
       totalElements: totalElements,
       currentPage: currentPage,

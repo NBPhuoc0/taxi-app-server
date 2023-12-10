@@ -11,7 +11,7 @@ import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
 @Controller('admin')
 @ApiBearerAuth()
 @ApiTags('Administration')
-@UseGuards(AccessTokenGuardA)
+@UseGuards(AccessTokenGuardA)  
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
@@ -108,5 +108,23 @@ export class AdminController {
   @Post('order')
   createOrder(@Body() order: CreateOrderDto,@Body('userID') userID: string) {
     return this.orderService.createByAdmin(userID, order);
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns list of orders ',
+  })
+  @Get('orders/filter')
+  getOrders(@Query() query: { src?: string, des?: string, orderStatus: string, limit?: number, currPage?: number }) {
+    return this.orderService.findOrders(query.src, query.des, query.orderStatus, query.limit, query.currPage);
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns list of orders ',
+  })
+  @Get('orders/details')
+  getOrderDetails(@Query() query: { id: string }) {
+    return this.orderService.findByid(query.id);
   }
 }
