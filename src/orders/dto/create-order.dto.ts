@@ -16,7 +16,7 @@ export class CreateOrderDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    oderTotal: number;
+    orderTotal: number;
 
     @ApiProperty()
     @IsNotEmpty()

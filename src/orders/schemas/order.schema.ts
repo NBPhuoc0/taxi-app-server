@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
-import { OderStatus } from "../../utils/enums/oderstatus.enum";
+import { OrderStatus } from "../../utils/enums/oderstatus.enum";
 import { location } from "../../utils/interface/location.interface";
 
 export type OrderDocument = Order & Document;
@@ -13,11 +13,11 @@ export type OrderDocument = Order & Document;
     timestamps: true,
 })
 export class Order {
-    @Prop({ default: OderStatus.PENDING })
-    oderStatus: OderStatus
+    @Prop({ default: OrderStatus.PENDING })
+    orderStatus: OrderStatus
 
-    @Prop({ required: true, unique: true })
-    oderTotal: number
+    @Prop({ required: true })
+    orderTotal: number
 
     @Prop({ required: true })
     source_address: string
@@ -31,10 +31,10 @@ export class Order {
     @Prop({})
     destination_location: location
 
-    @Prop({  })
+    @Prop({ ref: 'Driver' })
     driver: string
 
-    @Prop({ })
+    @Prop({ ref: 'User'})
     user: string
 }
 

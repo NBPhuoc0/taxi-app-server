@@ -1,11 +1,11 @@
 import { UpdateUserDto } from './dto/update-user.dto';
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, Res } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import { UserDto } from './dto/create-user.dto';
 import { AzureStorageService } from '../utils/auzre/storage-blob.service';
-
+import { FilterUserDto } from './dto/filter-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -29,6 +29,39 @@ export class UsersService {
         return this.userModel.find().exec()
     }
 
+
+    async findUsers(query: FilterUserDto) {
+        const limit = Number(query.limit) > 100 ? 100 : ( Number(query.limit) < 10 ? 10 : Number(query.limit) ) || 10;
+        const currentPage = Number(query.page) || 1;
+        const skip = limit * (currentPage - 1);
+    
+        const searchByName = query.fullname
+            ? {
+                fullname: {
+                    $regex: query.fullname,
+                    $options: 'i',
+                }
+            }: {};
+
+        const searchByPhone = query.phone
+            ? {
+                phone: {
+                    $regex: query.phone,
+                }
+            }: {};
+
+        const users = await this.userModel
+            .find({ ...searchByName })
+            .find({ ...searchByPhone })
+            .limit(limit)
+            .skip(skip).exec();
+        return {
+            totalElements: users.length,
+            currentPage: currentPage,
+            totalPage: Math.ceil(users.length / limit),
+            content: users
+        }
+    }
 
     async findById(id: string): Promise<UserDocument> {
         const user = await this.userModel.findById(id).exec()

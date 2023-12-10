@@ -8,6 +8,7 @@ import { AzureStorageService } from '../utils/auzre/storage-blob.service';
 import { location } from '../utils/interface/location.interface';
 import {  filesUploadDTO } from './dto/files.dto';
 import { Status } from 'src/utils/enums/driverstatus.enum';
+import { FilterUserDto } from 'src/users/dto/filter-user.dto';
 
 @Injectable()
 export class DriversService {
@@ -19,6 +20,38 @@ export class DriversService {
 
   logger = new Logger('DriversService');
 
+  async findDrivers(query: FilterUserDto) {
+    const limit = Number(query.limit) > 100 ? 100 : ( Number(query.limit) < 10 ? 10 : Number(query.limit) ) || 10;
+    const currentPage = Number(query.page) || 1;
+    const skip = limit * (currentPage - 1);
+
+    const searchByName = query.fullname
+        ? {
+            fullname: {
+                $regex: query.fullname,
+                $options: 'i',
+            }
+        }: {};
+
+    const searchByPhone = query.phone
+        ? {
+            phone: {
+                $regex: query.phone,
+            }
+        }: {};
+    const users = await this.driverModel
+        .find({ ...searchByName })
+        .find({ ...searchByPhone })
+        .limit(limit)
+        .skip(skip);
+
+    return {
+        totalElements: users.length,
+        currentPage: currentPage,
+        totalPage: Math.ceil(users.length / limit),
+        content: users
+    };
+  }
 
   async create(createDriverDto: CreateDriverDto, files: filesUploadDTO) {
     try {
@@ -99,8 +132,4 @@ export class DriversService {
 
     return driver
   }
-
-  
-
-
 }
