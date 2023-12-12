@@ -154,9 +154,9 @@ export class AdminController {
     status: 200,
     description: 'returns list of order locations',
   })
-  @Get('orders/available')
-  async getOrdersAvailable() {
-    return this.orderService.getOrdersAvailable();
+  @Get('orders/in-progress')
+  async getOrderInProgress() {
+    return this.orderService.findOrderInProgress();
   }
 
   @ApiOkResponse({

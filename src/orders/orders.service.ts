@@ -321,7 +321,7 @@ export class OrdersService {
     };
   }
 
-  async getOrdersAvailable(){
+  async findOrderInProgress(){
     const orderAvailable = await this.orderModel.find({
       orderStatus: { $nin: [OrderStatus.COMPLETED, OrderStatus.CANCEL] },
     },{
@@ -360,6 +360,16 @@ export class OrdersService {
       },
       { $sort: { total: -1 } },
       { $limit: 5 }, 
+      {
+        $project: {
+          id: '$_id',
+          fullname: 1,
+          phone: 1,
+          avatar: 1,
+          total: 1,
+          _id: 0
+        },
+      },
     ]);
     return drivers;
   }
