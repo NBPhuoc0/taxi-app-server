@@ -24,5 +24,6 @@ export class UserDto {
     avatar: string;
     refreshToken: string;
     email: string;
+    password: string;
 
 }

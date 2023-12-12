@@ -14,6 +14,7 @@ import { CreateDriverDto } from '../drivers/dto/create-driver.dto';
 import { filesUploadDTO } from '../drivers/dto/files.dto';
 import { AuthDto_pass_driver } from './dto/auth_pass_driver.dto';
 import { AuthDto_pass_admin } from './dto/auth_pass_admin.dto';
+import { UserDto } from 'src/users/dto/create-user.dto';
 @Injectable()
 export class AuthService {
     constructor(
@@ -38,20 +39,20 @@ export class AuthService {
         
     }
     
-    async signUpOTP_verify(createUserDto: CreateUserDto_verify): Promise<any> {
-        const otp_check = await this.verifyOTP(createUserDto.phone, createUserDto.code);
-        if (otp_check) {
-            const newUser = await this.usersService.create({
-                ...createUserDto,
-            })
+    // async signUpOTP_verify(createUserDto: CreateUserDto_verify): Promise<any> {
+    //     const otp_check = await this.verifyOTP(createUserDto.phone, createUserDto.code);
+    //     if (otp_check) {
+    //         const newUser = await this.usersService.create({
+    //             ...createUserDto,
+    //         })
         
-            const tokens = await this.getTokens(newUser._id, 'user')
-            await this.updateRefreshTokenU(newUser._id, tokens.refreshToken)
-            return { ...tokens }
-        } else {
-            throw new BadRequestException('OTP is not correct')
-        }
-    }
+    //         const tokens = await this.getTokens(newUser._id, 'user')
+    //         await this.updateRefreshTokenU(newUser._id, tokens.refreshToken)
+    //         return { ...tokens }
+    //     } else {
+    //         throw new BadRequestException('OTP is not correct')
+    //     }
+    // }
 
 
 
@@ -244,6 +245,30 @@ export class AuthService {
         const passwordHash = await argon2.hash(password);
         await this.driverService.update(driver._id, {password: passwordHash});
         return 'Password reset successfully';
+    }
+
+    async userPasswordSignin(phone: string, password: string) {
+        const user = await this.usersService.findByPhone(phone);
+        if(!user) throw new NotFoundException('User does not exist');
+        const isPasswordValid = await argon2.verify(user.password, password);
+        if (!isPasswordValid) throw new UnauthorizedException('Invalid password');
+        const tokens = await this.getTokens(user._id, 'user');
+        await this.updateRefreshTokenU(user._id, tokens.refreshToken);
+        return { ...tokens };
+    }
+
+    async userPasswordSignup(user: UserDto) {
+        const user_check = await this.usersService.findByPhone(user.phone);
+        if(user_check) throw new BadRequestException('Phone number already exists');
+        const passwordHash = await argon2.hash(user.password);
+        const newUser = await this.usersService.create({
+            ...user,
+            password: passwordHash
+        })
+    
+        const tokens = await this.getTokens(newUser._id, 'user')
+        await this.updateRefreshTokenU(newUser._id, tokens.refreshToken)
+        return { ...tokens }
     }
 
 }

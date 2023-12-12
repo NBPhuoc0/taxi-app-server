@@ -31,10 +31,16 @@ export class Order {
     @Prop({})
     destination_location: location
 
-    @Prop({ ref: 'Driver' })
+    @Prop({})
+    distance: number;
+
+    @Prop({})
+    duration: number;
+
+    @Prop({})
     driver: string
 
-    @Prop({ ref: 'User'})
+    @Prop({})
     user: string
 }
 
