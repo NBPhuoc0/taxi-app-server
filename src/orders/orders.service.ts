@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -6,6 +6,7 @@ import { Model, Query } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OrderStatus } from 'src/utils/enums/oderstatus.enum';
+import { location } from 'src/utils/interface/location.interface';
 
 @Injectable()
 export class OrdersService {
@@ -23,9 +24,21 @@ export class OrdersService {
   async create(id:string,createOrderDto: CreateOrderDto) {
     const newOrder = {...createOrderDto, user: id}
     const order = new this.orderModel(newOrder);
-    this.eventEmitter.emit('order.new', order);
+    // this.eventEmitter.emit('order.new', order);
     return order;
   }
+  
+  async cancelOrder(id: string, user: string) {
+    const order = await this.orderModel.findById(id).exec();
+    if (!order) throw new ConflictException('Order not found');
+    if (order.user.toString() !== user) throw new ConflictException('User dont have permission to cancel this order');
+    if (order.orderStatus !== OrderStatus.PENDING) throw new ConflictException('Order is not waiting');
+    order.orderStatus = OrderStatus.CANCEL;
+    order.save();
+    // this.eventEmitter.emit('order.cancel', order);
+    return order;
+  }
+
 
   async createByAdmin(id:string, createOrderDto: CreateOrderDto) {
     const newOrder = {...createOrderDto, user: id}
@@ -40,7 +53,27 @@ export class OrdersService {
     }).exec();
   }
 
-  async getOrderPercentageChange (userID: string, driverID: string, currDate: string, preDate: string){
+  async findByid_driver(id: string) {
+    const driver = await this.orderModel
+    .findById(id)
+    .select('driver')
+    .exec();
+    return driver.driver;
+  }
+
+  async findByid_userOrderComplete(id: string) {
+    return await this.orderModel
+    .findOne({ user: id, orderStatus: OrderStatus.COMPLETED })
+    .exec();
+  }
+
+  async findByid_driverOrderComplete(id: string) {
+    return await this.orderModel
+    .find({ driver: id, orderStatus: OrderStatus.COMPLETED })
+    .exec();
+  }
+
+  async getOrderPercentageChange ( currDate?: string, preDate?: string, userID?: string, driverID?: string ){
     const queryToday = {
       createdAt: {
         $gte: new Date(`${currDate}T00:00:00.000Z`),
@@ -55,11 +88,11 @@ export class OrdersService {
       }
     };
 
-    if (userID !== '') {
+    if (userID !== '' && userID) {
       queryToday['user'] = userID;
       queryYesterday['user'] = userID;
     }
-    else if(driverID !== ''){
+    else if(driverID !== '' && driverID){
       queryToday['driver'] = driverID;
       queryYesterday['driver'] = driverID;
     }
@@ -70,7 +103,7 @@ export class OrdersService {
     return totalOrdersYesterday === 0 ? (totalOrdersToday === 0 ? 0 : 100) : parseFloat((((totalOrdersToday - totalOrdersYesterday) / totalOrdersYesterday) * 100).toFixed(2));
   }
   
-  async getEarningPercentageChange(userID: string, driverID: string, currDate: string, preDate: string){
+  async getEarningPercentageChange(currDate?: string, preDate?: string, userID?: string, driverID?: string){
     const queryToday = {
       createdAt: {
         $gte: new Date(`${currDate}T00:00:00.000Z`),
@@ -85,11 +118,11 @@ export class OrdersService {
       }
     };
 
-    if (userID !== '') {
+    if (userID !== '' && userID) {
       queryToday['user'] = userID;
       queryYesterday['user'] = userID;
     }
-    else if(driverID !== ''){
+    else if(driverID !== '' && driverID){
       queryToday['driver'] = driverID;
       queryYesterday['driver'] = driverID;
     }
@@ -120,13 +153,13 @@ export class OrdersService {
     return earningPercentageChange;
   }
 
-  async getCancelledPercentageChange(userID: string, driverID: string, currDate: string, preDate: string){
+  async getCancelledPercentageChange( currDate?: string, preDate?: string, userID?: string, driverID?: string ){
     const queryToday = {
       createdAt: {
         $gte: new Date(`${currDate}T00:00:00.000Z`),
         $lte: new Date(`${currDate}T23:59:59.999Z`),
       },
-      orderStatus: OrderStatus.CANCELLED
+      orderStatus: OrderStatus.CANCEL
     };
 
     const queryYesterday = {
@@ -134,14 +167,14 @@ export class OrdersService {
         $gte: new Date(`${preDate}T00:00:00.000Z`),
         $lte: new Date(`${preDate}T23:59:59.999Z`),
       },
-      orderStatus: OrderStatus.CANCELLED
+      orderStatus: OrderStatus.CANCEL
     };
 
-    if (userID !== '') {
+    if (userID !== '' && userID) {
       queryToday['user'] = userID;
       queryYesterday['user'] = userID;
     }
-    else if(driverID !== ''){
+    else if(driverID !== '' && driverID){
       queryToday['driver'] = driverID;
       queryYesterday['driver'] = driverID;
     }
@@ -165,6 +198,53 @@ export class OrdersService {
     return totalEarning;
   }
 
+  async ordersByTime(year?: string, month?: string){
+    const y = year ?? new Date().getFullYear();
+    const m = month ?? new Date().getMonth() + 1;
+    let mStart, dStart;
+    let mEnd, dEnd;
+    let formatDate;
+
+    if(month){
+      mStart = mEnd = m;
+      dStart = 1;
+      dEnd = 31;
+      formatDate = '%Y-%m-%d';
+    }
+    else{
+      mStart = 1;
+      mEnd = 12;
+      dStart = 1;
+      dEnd = 31;
+      formatDate = '%Y-%m';
+    }
+    const ordersByTime = await this.orderModel.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: new Date(`${y}-${mStart}-${dStart}T00:00:00.000Z`),
+            $lt: new Date(`${y}-${mEnd}-${dEnd}T23:59:59.999Z`)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: formatDate, date: '$createdAt' } },
+          total: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          date: '$_id', 
+          total: 1,
+          _id: 0,
+        },
+      },
+      { $sort: { _id: 1 } }
+    ])
+    return ordersByTime;
+  }
+
   async statisticsByUser(userID: string){
     const date = new Date();
     date.setDate(new Date().getDate()-1);
@@ -173,14 +253,14 @@ export class OrdersService {
 
     const orders = await this.orderModel.find({ user: userID }).count().exec();
     const totalEarning = await this.getToTalEarningByID(userID, '');
-    const totalOrderCancelled = await this.orderModel.find({ user: userID, orderStatus: OrderStatus.CANCELLED}).count().exec();
-    const orderPercentageChange = await this.getOrderPercentageChange(userID, '', currDate, preDate);
-    const earningPercentageChange  = await this.getEarningPercentageChange(userID, '', currDate, preDate);
-    const cancelledPercentageChange = await this.getCancelledPercentageChange(userID, '', currDate, preDate);
+    const totalOrderCancelled = await this.orderModel.find({ user: userID, orderStatus: OrderStatus.CANCEL}).count().exec();
+    const orderPercentageChange = await this.getOrderPercentageChange(currDate, preDate, userID, '');
+    const earningPercentageChange  = await this.getEarningPercentageChange(currDate, preDate, userID, '');
+    const cancelledPercentageChange = await this.getCancelledPercentageChange( currDate, preDate, userID, '' );
     return{
       totalOrder: orders,
       orderPercentageChange: orderPercentageChange,
-      totalEarning: totalEarning.length > 0 ? totalEarning[0].total : 0,
+      totalEarning: totalEarning[0].total ?? 0,
       earningPercentageChange: earningPercentageChange,
       totalOrderCancelled: totalOrderCancelled,
       cancelledPercentageChange: cancelledPercentageChange,
@@ -195,18 +275,58 @@ export class OrdersService {
 
     const orders = await this.orderModel.find({ driver: driverID }).count().exec();
     const totalEarning = await this.getToTalEarningByID('',driverID);
-    const totalOrderCancelled = await this.orderModel.find({ driver: driverID, orderStatus: OrderStatus.CANCELLED}).count().exec();
-    const orderPercentageChange = await this.getOrderPercentageChange('', driverID, currDate, preDate);
-    const earningPercentageChange  = await this.getEarningPercentageChange('', driverID, currDate, preDate);
-    const cancelledPercentageChange = await this.getCancelledPercentageChange('', driverID, currDate, preDate);
+    const totalOrderCancelled = await this.orderModel.find({ driver: driverID, orderStatus: OrderStatus.CANCEL}).count().exec();
+    const orderPercentageChange = await this.getOrderPercentageChange( currDate, preDate, '', driverID );
+    const earningPercentageChange  = await this.getEarningPercentageChange( currDate, preDate, '', driverID );
+    const cancelledPercentageChange = await this.getCancelledPercentageChange( currDate, preDate, '', driverID );
     return{
       totalOrder: orders,
       orderPercentageChange: orderPercentageChange,
-      totalEarning: totalEarning.length > 0 ? totalEarning[0].total : 0,
+      totalEarning: totalEarning[0].total ?? 0,
       earningPercentageChange: earningPercentageChange,
       totalOrderCancelled: totalOrderCancelled,
       cancelledPercentageChange: cancelledPercentageChange,
     }
+  }
+
+  async statisticsByAdmin(){
+    const date = new Date();
+    date.setDate(new Date().getDate()-1);
+    const currDate = new Date().toISOString().slice(0,10);
+    const preDate = date.toISOString().slice(0,10)
+
+    const totalOrders = await this.orderModel.find().count().exec();
+    const totalOrderCancelled = await this.orderModel.find({ orderStatus: OrderStatus.CANCEL }).count().exec();
+    const totalEarning = await this.orderModel.aggregate([
+      { $group: {
+          _id: null,
+          total: { $sum: '$orderTotal' }
+        }
+      }
+    ]).exec();
+
+    const orderPercentageChange = await this.getOrderPercentageChange(currDate, preDate);
+    const earningPercentageChange = await this.getEarningPercentageChange(currDate, preDate);
+    const cancelledPercentageChange = await this.getCancelledPercentageChange(currDate, preDate);
+    return {
+      totalOrder: totalOrders,
+      orderPercentageChange: orderPercentageChange,
+      totalEarning: totalEarning[0].total ?? 0,
+      earningPercentageChange: earningPercentageChange,
+      totalOrderCancelled: totalOrderCancelled,
+      cancelledPercentageChange: cancelledPercentageChange,
+    };
+  }
+
+  async getOrdersAvailable(){
+    const orderAvailable = await this.orderModel.find({
+      orderStatus: { $nin: [OrderStatus.COMPLETED, OrderStatus.CANCEL] },
+    },{
+      source_location: 1,
+      destination_location: 1,
+    }
+    ).exec();
+    return orderAvailable;
   }
 
   async findByUser(uid: string, src?: string, des?: string, limit?: number, currPage?: number) {
@@ -285,8 +405,65 @@ export class OrdersService {
     return this.orderModel.find().exec();
   }
 
-  async remove(id: string) {
-    return this.orderModel.findByIdAndDelete(id).exec();
+  // async remove(id: string) {
+  //   return this.orderModel.findByIdAndDelete(id).exec();
+  // }
+
+  /// UPDATE ///
+
+  getDistance(fromLat: number, fromLong: number, toLat: number, toLong: number) {
+    const earthRadiusKm = 6371;
+    const fromLatRad = fromLat * (Math.PI / 180);
+    const fromLongRad = fromLong * (Math.PI / 180);
+    const toLatRad = toLat * (Math.PI / 180);
+    const toLongRad = toLong * (Math.PI / 180);
+  
+    const dLat = toLatRad - fromLatRad;
+    const dLong = toLongRad - fromLongRad;
+  
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(fromLatRad) * Math.cos(toLatRad) * Math.sin(dLong / 2) ** 2;
+  
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  
+    const distance = earthRadiusKm * c;
+  
+    return distance;
   }
+  
+  async getNearbyBookingRequest(location: location,distance_expect: number) {
+    const orders = await this.orderModel.find({ orderStatus: OrderStatus.PENDING }).exec();
+    const nearbyOrders = orders.filter((order) => {
+      const distance = this.getDistance(
+        location.lat,
+        location.long,
+        order.source_location.lat,
+        order.source_location.long,
+      );
+      return distance <= distance_expect ?? 25;
+    });
+    return nearbyOrders;
+  }
+
+  async acceptBookingRequest(orderID: string, location: location, driverID: string) {
+    const order = await this.orderModel.findById(orderID).exec();
+    if (!order) throw new ConflictException('Order not found');
+    if (order.orderStatus !== OrderStatus.PENDING) throw new ConflictException('Order is not waiting');
+    order.orderStatus = OrderStatus.INPROGRESS;
+    order.driver = driverID;
+    order.save();
+    // this.eventEmitter.emit('order.accept', order);
+    return order;
+  }
+
+  async setCompleted(orderID: string, driverID: string) {
+    const order = await this.orderModel.findById(orderID).exec();
+    if (!order) throw new ConflictException('Order not found');
+    if (order.orderStatus !== OrderStatus.INPROGRESS) throw new ConflictException('Order is not in progress');
+    order.orderStatus = OrderStatus.COMPLETED;
+    order.save();
+    // this.eventEmitter.emit('order.complete', order);
+    return order;
+  }
+
 }
 

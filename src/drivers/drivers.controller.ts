@@ -23,24 +23,43 @@ export class DriversController {
 
   logger = new Logger('DriversController');
 
-  @Get()
+  @Get('userInfor')
   findById(@Req() req: RequestWithDriver) {
-    this.logger.log(req.user['sub']);
+    // this.logger.log(req.user['sub']);
+    return this.driversService.findById(req.user['sub']);
   }
 
-  @Get('location')
-  findById_location( @Req() req: RequestWithDriver) {
-    return this.driversService.findById_location(req.user['sub']);
+  @Patch('setlocation')
+  findById_location( @Req() req: RequestWithDriver, @Body() body: { location: location }) {
+    return this.driversService.updateLocation(req.user['sub'], body.location);
   }
+
+  @Get('getNearbyBookingRequest')
+  async getNearbyBookingRequest(@Req() req: RequestWithDriver, @Body() body: { distance_expect: number} ) {
+    const location = await this.driversService.findById_location(req.user['sub']);
+    return this.ordersService.getNearbyBookingRequest(location, body.distance_expect);
+  }
+
+  @Patch('acceptBookingRequest')
+  async acceptBookingRequest(@Req() req: RequestWithDriver, @Body() body: { order: string}) {
+    const location = await this.driversService.findById_location(req.user['sub']);
+    return this.ordersService.acceptBookingRequest(body.order, location, req.user['sub']);
+  }
+
+  @Get('getHistory')
+  async getHistory(@Req() req: RequestWithDriver) {
+    return this.ordersService.findByid_driverOrderComplete(req.user['sub']);
+  }
+
+  @Patch('setCompleted')
+  async setCompleted(@Req() req: RequestWithDriver, @Body() body: { order: string}) {
+    return this.ordersService.setCompleted(body.order, req.user['sub']);
+  }
+
 
   @Patch('profile')
   update(@Req() req: RequestWithDriver, @Body() updateDriverDto: UpdateDriverDto) {
     return this.driversService.update(req.user['sub'], updateDriverDto);
-  }
-
-  @Patch('location')
-  update_location(@Req() req: RequestWithDriver, @Body() location: location) {
-    return this.driversService.updateLocation(req.user['sub'], location);
   }
 
   @Patch('status')
@@ -48,24 +67,24 @@ export class DriversController {
     return this.driversService.updateStatus(req.user['sub'], status);
   }
 
-  @Sse('wait')
-  @OnEvent('order.new')
-  async sse(@Req() req: RequestWithDriver):Promise<Observable<MessageEvent<OrderDocument>>> {
-    const eventEmitter = await this.ordersService.getObservable(); 
-    return fromEvent(eventEmitter, 'order.new').pipe(
-      map((data : OrderDocument ) => {
-        if (req.user['sub'] == data.driver) {
-          return new MessageEvent('order.new', { data } );
-        }
-      }),
-    );
-  } 
+  // @Sse('wait')
+  // @OnEvent('order.new')
+  // async sse(@Req() req: RequestWithDriver):Promise<Observable<MessageEvent<OrderDocument>>> {
+  //   const eventEmitter = await this.ordersService.getObservable(); 
+  //   return fromEvent(eventEmitter, 'order.new').pipe(
+  //     map((data : OrderDocument ) => {
+  //       if (req.user['sub'] == data.driver) {
+  //         return new MessageEvent('order.new', { data } );
+  //       }
+  //     }),
+  //   );
+  // } 
 
-  @Get('emit')
-  async emit(@Req() req: RequestWithDriver){
-    const eventEmitter = await this.ordersService.getObservable(); 
-    eventEmitter.emit('order.new', 'order');
-  }
+  // @Get('emit')
+  // async emit(@Req() req: RequestWithDriver){
+  //   const eventEmitter = await this.ordersService.getObservable(); 
+  //   eventEmitter.emit('order.new', 'order');
+  // }
 
   @Get('order')
   findOrder(@Req() req: RequestWithDriver) {

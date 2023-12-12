@@ -130,6 +130,38 @@ export class AdminController {
     return this.orderService.findByid(query.id);
   }
 
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns statistics',
+  })
+  @Get('orders/statistics')
+  async getStatisticsByAdmin() {
+    const statisticsOrders = await this.orderService.statisticsByAdmin();
+    return {
+      statisticsOrders: statisticsOrders,
+      statisticsDriver: 1
+    };
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns list of order locations',
+  })
+  @Get('orders/available')
+  async getOrdersAvailable() {
+    return this.orderService.getOrdersAvailable();
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns list of order locations',
+  })
+  @Get('orders/by-time')
+  async getOrdersByTime(@Query() query: { year?: string, month?: string }) {
+    return this.orderService.ordersByTime(query.year, query.month);
+  }
+
+  //
   @Post('sms')
   sendSMS(@Body() body: {phone: string, message: string}) {
     try {
