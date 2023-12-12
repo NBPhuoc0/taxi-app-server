@@ -25,23 +25,12 @@ export class DriversService {
     const currentPage = Number(query.page) || 1;
     const skip = limit * (currentPage - 1);
 
-    const searchByName = query.fullname
-        ? {
-            fullname: {
-                $regex: query.fullname,
-                $options: 'i',
-            }
-        }: {};
+    const searchConditions = {}
+    if (query.fullname) searchConditions['fullname'] = { $regex: new RegExp(query.fullname, 'i') };    
+    if (query.phone) searchConditions['phone'] = { $regex: new RegExp(query.phone, 'i') };   
 
-    const searchByPhone = query.phone
-        ? {
-            phone: {
-                $regex: query.phone,
-            }
-        }: {};
     const users = await this.driverModel
-        .find({ ...searchByName })
-        .find({ ...searchByPhone })
+        .find({ ...searchConditions })
         .limit(limit)
         .skip(skip);
 

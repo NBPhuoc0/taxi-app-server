@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty, IsNumber } from "class-validator";
 
 export class CreateOrderDto {
     @ApiProperty()
@@ -20,6 +20,7 @@ export class CreateOrderDto {
 
     @ApiProperty()
     @IsNotEmpty()
+    @IsNumber()
     source_location: {
         lat: number;
         long: number;
@@ -27,6 +28,7 @@ export class CreateOrderDto {
     
     @ApiProperty()
     @IsNotEmpty()
+    @IsNumber()
     destination_location: {
         lat: number;
         long: number;
