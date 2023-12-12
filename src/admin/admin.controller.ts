@@ -147,10 +147,7 @@ export class AdminController {
   @Get('orders/statistics')
   async getStatisticsByAdmin() {
     const statisticsOrders = await this.orderService.statisticsByAdmin();
-    return {
-      statisticsOrders: statisticsOrders,
-      statisticsDriver: 1
-    };
+    return statisticsOrders;
   }
 
   @ApiOkResponse({

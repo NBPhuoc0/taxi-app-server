@@ -16,7 +16,7 @@ export class DriversService {
     @InjectModel(Driver.name) 
     private driverModel: Model<DriverDocument>,
     private azureStorage: AzureStorageService
-) {}
+  ) {}
 
   logger = new Logger('DriversService');
 

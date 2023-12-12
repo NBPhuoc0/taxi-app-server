@@ -308,6 +308,8 @@ export class OrdersService {
     const orderPercentageChange = await this.getOrderPercentageChange(currDate, preDate);
     const earningPercentageChange = await this.getEarningPercentageChange(currDate, preDate);
     const cancelledPercentageChange = await this.getCancelledPercentageChange(currDate, preDate);
+    const percentOrderCompleted = await this.findOrdersCompleted();
+
     return {
       totalOrder: totalOrders,
       orderPercentageChange: orderPercentageChange,
@@ -315,6 +317,7 @@ export class OrdersService {
       earningPercentageChange: earningPercentageChange,
       totalOrderCancelled: totalOrderCancelled,
       cancelledPercentageChange: cancelledPercentageChange,
+      percentOrderCompleted: percentOrderCompleted
     };
   }
 
@@ -431,6 +434,14 @@ export class OrdersService {
       totalPage: Math.ceil(totalElements / pageSize),
       content: orders
     }
+  }
+
+  async findOrdersCompleted(){
+    const ordersCompleted = await this.orderModel.find({
+      orderStatus: OrderStatus.COMPLETED
+    }).count().exec();
+    const orders = await this.orderModel.find().count().exec();
+    return parseFloat(((ordersCompleted/orders)*100).toFixed(2))
   }
 
   async findAll() {
