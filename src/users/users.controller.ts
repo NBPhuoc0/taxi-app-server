@@ -6,15 +6,18 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import RequestWithUser from '../utils/interface/requestWithUser.interface';
 import { OrdersService } from 'src/orders/orders.service';
 import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
+import { location } from 'src/utils/interface/location.interface';
+import { DriversService } from 'src/drivers/drivers.service';
 
 @ApiTags('Users')
 @Controller('users')
 @ApiBearerAuth()
-@UseGuards(AccessTokenGuardU)
+// @UseGuards(AccessTokenGuardU)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly ordersService: OrdersService,
+    private readonly driverService: DriversService,
   ) {
   } 
 
@@ -22,7 +25,7 @@ export class UsersController {
     status: 200,
     description: 'returns User ',
   })
-  @Get()
+  @Get('userInfor')
   getCurrentUser(@Req() req: RequestWithUser) {
     return this.usersService.findById(req.user['sub'])
   }
@@ -44,14 +47,43 @@ export class UsersController {
     return this.usersService.update(req.user['sub'], req.body);
   }
 
+  @Patch('setLocation')
+  setLocation(@Req() req: RequestWithUser, @Body() body: location) {
+    return this.usersService.updateLocation(req.user['sub'], body);
+  }
+
+  @Get('getHistory')
+  getHistory(@Req() req: RequestWithUser) {
+    return this.ordersService.findByid_userOrderComplete(req.user['sub']);
+  }
+
+  @Post('getDriverLocationByBR')
+  async getDriverLocationByBR(@Body() body: { id: string }) {
+    const driver = await this.ordersService.findByid_driver(body.id);
+    return this.driverService.findById_location(driver);
+  }
+    
+  @Post('rateDriver')
+  async rateDriver(@Body() body: { id: string, rate: number }) {
+    const driver = await this.ordersService.findByid_driver(body.id);
+    return this.driverService.rateDriver(driver, body.rate);
+  }
+
+  @Get('driverRate')
+  async driverRate(@Body() body: { id: string}) {
+    const driver = await this.ordersService.findByid_driver(body.id);
+    return this.driverService.driverRate(driver);
+  }
+
   @Post('order')
-  createOrder(@Req() req: RequestWithUser, @Body() body: CreateOrderDto) {      
-    return this.ordersService.create(req.user['sub'], req.body);    
+  async createOrder(@Req() req: RequestWithUser, @Body() body: CreateOrderDto) {
+    return this.ordersService.create(req.user['sub'], body);
+  }
+  
+  @Post('cancelOrder')
+  async cancelOrder(@Req() req: RequestWithUser, @Body() body: { id: string }) {
+    return this.ordersService.cancelOrder(req.user['sub'], body.id);
   }
 
-  @Get('order')
-  findOrder(@Req() req: RequestWithUser) {
-    return this.ordersService.findByUser(req.user['sub']);
-  }
-
+  
 }

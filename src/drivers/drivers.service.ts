@@ -107,10 +107,10 @@ export class DriversService {
     return driver
   }
 
-  async findById_location(id: string): Promise<DriverDocument> {
-    const location = await this.driverModel.findById(id).select('location').exec()
+  async findById_location(id: string): Promise<location> {
+    const driver = await this.driverModel.findById(id).select('location').exec()
 
-    return location
+    return driver.location
   }
 
   async verify(id: string,status : boolean): Promise<DriverDocument> {
@@ -131,5 +131,22 @@ export class DriversService {
     if (!driver) throw new HttpException('Driver not found', HttpStatus.NOT_FOUND)
 
     return driver
+  }
+
+  async rateDriver(id: string, rate: number) {
+    const driver = await this.driverModel.findById(id).exec()
+
+    const totalRate = driver.totalRate + rate;
+    const totalRateCount = driver.totalRateCount + 1;
+    const newRate = totalRate / totalRateCount;
+
+    const newDriver = await this.driverModel.findByIdAndUpdate(id, { rate: newRate, totalRate: totalRate, totalRateCount: totalRateCount }, { new: true }).exec()
+
+    return newDriver
+  }
+
+  async driverRate(id: string) {
+    const driver = await this.driverModel.findById(id).select('rate').exec()
+    return driver.rate
   }
 }

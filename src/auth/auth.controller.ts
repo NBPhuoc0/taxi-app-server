@@ -17,6 +17,7 @@ import { AuthDto_pass_admin } from './dto/auth_pass_admin.dto';
 import { AccessTokenGuardD } from 'src/utils/guards/accessTokenD.guard';
 import { AccessTokenGuardA } from 'src/utils/guards/accessTokenA.guard';
 import { AccessTokenGuardU } from 'src/utils/guards/accessTokenU.guard';
+import { UserDto } from 'src/users/dto/create-user.dto';
 
 @Controller('auth')
 @ApiBearerAuth()
@@ -24,18 +25,46 @@ import { AccessTokenGuardU } from 'src/utils/guards/accessTokenU.guard';
 export class AuthController {
     constructor(private authService: AuthService) {}
 
+    // @ApiBody({
+    //     description: 'Check if phone number is registered then send OTP',
+    //     type: CreateUserDto_send,
+        
+    // })
+    // @ApiOkResponse({
+    //     status: 200,
+    //     description: 'returns 200 status when phone number is valid and sends OTP',
+    // })
+    // @Post('user/signupsend')
+    // signup_otp(@Body() createUserDto: CreateUserDto_send) {
+    //   return this.authService.signUpOTP_send(createUserDto);
+    // }
+
+    // @ApiBody({
+    //     description: 'Contains properties to create User',
+    //     type: CreateUserDto_verify,
+        
+    // })
+    // @ApiCreatedResponse({
+    //     status: 201,
+    //     description: 'returns 201 status and a refresh and access token when a user successfully signs up',
+    // })
+    // @Post('user/signupverify')
+    // signup_verify(@Body() createUserDto: CreateUserDto_verify) {
+    //   return this.authService.signUpOTP_verify(createUserDto);
+    // }
+
     @ApiBody({
-        description: 'Check if phone number is registered then send OTP',
-        type: CreateUserDto_send,
+        description: 'Contains properties to create User',
+        type: CreateUserDto_verify,
         
     })
-    @ApiOkResponse({
-        status: 200,
-        description: 'returns 200 status when phone number is valid and sends OTP',
+    @ApiCreatedResponse({
+        status: 201,
+        description: 'returns 201 status and a refresh and access token when a user successfully signs up',
     })
-    @Post('user/signupsend')
-    signup(@Body() createUserDto: CreateUserDto_send) {
-      return this.authService.signUpOTP_send(createUserDto);
+    @Post('user/signup')
+    signup(@Body() createUserDto: UserDto) {
+      return this.authService.userPasswordSignup(createUserDto);
     }
 
     @ApiBody({
@@ -47,10 +76,11 @@ export class AuthController {
         status: 201,
         description: 'returns 201 status and a refresh and access token when a user successfully signs up',
     })
-    @Post('user/signupverify')
-    signup_verify(@Body() createUserDto: CreateUserDto_verify) {
-      return this.authService.signUpOTP_verify(createUserDto);
+    @Post('user/signin')
+    signin(@Body() data: {phone: string, password: string}) {
+      return this.authService.userPasswordSignin(data.phone, data.password);
     }
+
 
 
     @ApiBody({
@@ -63,7 +93,7 @@ export class AuthController {
         description: 'returns 200 status when phone number is valid and sends OTP',
     })
     @Post('user/signinsend')
-    signin(@Body() data: AuthDto_send) {
+    signin_otp(@Body() data: AuthDto_send) {
       return this.authService.signInOTP_send(data);
     }
 

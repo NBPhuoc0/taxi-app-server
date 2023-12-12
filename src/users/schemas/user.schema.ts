@@ -14,6 +14,9 @@ export class User {
     phone: string
 
     @Prop({ required: true })
+    password: string
+
+    @Prop({ required: true })
     fullname: string
 
     @Prop({  })

@@ -62,6 +62,15 @@ export class Driver {
 
     @Prop()
     refreshToken: string
+
+    @Prop({ default: 0 })
+    rate: number
+
+    @Prop({ default: 0 })
+    totalRate: number
+
+    @Prop({ default: 0 })
+    totalRateCount: number
 }
 
 
