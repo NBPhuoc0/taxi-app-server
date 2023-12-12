@@ -241,7 +241,7 @@ export class OrdersService {
         },
       },
       { $sort: { _id: 1 } }
-    ])
+    ]).exec()
     return ordersByTime;
   }
 
@@ -327,6 +327,38 @@ export class OrdersService {
     }
     ).exec();
     return orderAvailable;
+  }
+
+  async findTopDrivers(){
+    const drivers = await this.orderModel.aggregate([
+      {
+        $addFields: {
+          driverObjectId: { $toObjectId: "$driver" }
+        }
+      },
+      {
+        $lookup:
+          {
+            from: "drivers",
+            localField: "driverObjectId",
+            foreignField: "_id",
+            as: "driver_info"
+          }
+      },
+      { $unwind: "$driver_info" },
+      {
+        $group: {
+          _id: '$driver_info._id',
+          fullname: { $first: '$driver_info.fullname' },
+          phone: { $first: '$driver_info.phone' },
+          avatar: { $first: '$driver_info.avatar' },
+          total: { $sum: '$orderTotal' }
+        }
+      },
+      { $sort: { total: -1 } },
+      { $limit: 5 }, 
+    ]);
+    return drivers;
   }
 
   async findByUser(uid: string, src?: string, des?: string, limit?: number, currPage?: number) {

@@ -67,6 +67,16 @@ export class AdminController {
   }
 
   // ORDER
+  
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns list of drivers',
+  })
+  @Get('orders/top-drivers')
+  async getTopDrivers() {
+    return this.orderService.findTopDrivers();
+  }
+
   @ApiOkResponse({
     status: 200,
     description: 'returns list of orders ',
