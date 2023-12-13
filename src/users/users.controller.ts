@@ -12,7 +12,7 @@ import { DriversService } from 'src/drivers/drivers.service';
 @ApiTags('Users')
 @Controller('users')
 @ApiBearerAuth()
-// @UseGuards(AccessTokenGuardU)
+@UseGuards(AccessTokenGuardU)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
@@ -58,15 +58,14 @@ export class UsersController {
   }
 
   @Post('getDriverLocationByBR')
-  async getDriverLocationByBR(@Body() body: { id: string }) {
-    const driver = await this.ordersService.findByid_driver(body.id);
+  async getDriverLocationByBR(@Body() body: { booking_id: string }) {
+    const driver = await this.ordersService.findByid_driver(body.booking_id);
     return this.driverService.findById_location(driver);
   }
     
   @Post('rateDriver')
-  async rateDriver(@Body() body: { id: string, rate: number }) {
-    const driver = await this.ordersService.findByid_driver(body.id);
-    return this.driverService.rateDriver(driver, body.rate);
+  async rateDriver(@Body() body: { driver_id: string, rate: number }) {
+    return this.driverService.rateDriver(body.driver_id, body.rate);
   }
 
   @Get('driverRate')
@@ -81,8 +80,8 @@ export class UsersController {
   }
   
   @Post('cancelOrder')
-  async cancelOrder(@Req() req: RequestWithUser, @Body() body: { id: string }) {
-    return this.ordersService.cancelOrder(req.user['sub'], body.id);
+  async cancelOrder(@Req() req: RequestWithUser, @Body() body: { booking_id: string }) {
+    return this.ordersService.cancelOrder(req.user['sub'], body.booking_id);
   }
 
   
