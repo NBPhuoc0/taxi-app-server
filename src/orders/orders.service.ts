@@ -63,7 +63,7 @@ export class OrdersService {
 
   async findByid_userOrderComplete(id: string) {
     return await this.orderModel
-    .findOne({ user: id, orderStatus: OrderStatus.COMPLETED })
+    .find({ user: id, orderStatus: OrderStatus.COMPLETED })
     .exec();
   }
 
