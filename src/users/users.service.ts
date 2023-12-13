@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { UserDto } from './dto/create-user.dto';
 import { AzureStorageService } from '../utils/auzre/storage-blob.service';
 import { FilterUserDto } from './dto/filter-user.dto';
+import { location } from 'src/utils/interface/location.interface';
 
 @Injectable()
 export class UsersService {
@@ -102,8 +103,8 @@ export class UsersService {
         }
     }
 
-    async updateLocation(id: string, location: { lat: number, long: number }): Promise<UserDocument>  {
-        const user = await this.userModel.findByIdAndUpdate(id, {location : location}, { new: true }).exec()
+    async updateLocation(id: string, location: location): Promise<UserDocument>  {
+        const user = await this.userModel.findByIdAndUpdate(id, {location : location} ).exec()
 
         return user
     }
