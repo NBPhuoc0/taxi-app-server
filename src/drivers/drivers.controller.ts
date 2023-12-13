@@ -36,14 +36,14 @@ export class DriversController {
 
   @Get('getNearbyBookingRequest')
   async getNearbyBookingRequest(@Req() req: RequestWithDriver, @Body() body: { distance_expect: number} ) {
-    const location = await this.driversService.findById_location(req.user['sub']);
-    return this.ordersService.getNearbyBookingRequest(location, body.distance_expect);
+    const driver = await this.driversService.findById_location(req.user['sub']);
+    return this.ordersService.getNearbyBookingRequest(driver.location, body.distance_expect);
   }
 
   @Patch('acceptBookingRequest')
   async acceptBookingRequest(@Req() req: RequestWithDriver, @Body() body: { order: string}) {
-    const location = await this.driversService.findById_location(req.user['sub']);
-    return this.ordersService.acceptBookingRequest(body.order, location, req.user['sub']);
+    const driver = await this.driversService.findById_location(req.user['sub']);
+    return this.ordersService.acceptBookingRequest(body.order, driver.location, req.user['sub']);
   }
 
   @Get('getHistory')

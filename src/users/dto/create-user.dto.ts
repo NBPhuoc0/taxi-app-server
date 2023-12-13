@@ -21,9 +21,10 @@ export class UserDto {
     @IsNotEmpty()
     fullname: string;
 
+    @IsNotEmpty()
+    password: string;
+
     avatar: string;
     refreshToken: string;
     email: string;
-    password: string;
-
 }

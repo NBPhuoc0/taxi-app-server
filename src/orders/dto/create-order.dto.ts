@@ -37,8 +37,4 @@ export class CreateOrderDto {
     @IsNotEmpty()
     duration: number;
 
-    @ApiProperty()
-    @IsNotEmpty()
-    user: string;
-
 }

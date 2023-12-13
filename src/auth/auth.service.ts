@@ -260,6 +260,7 @@ export class AuthService {
     async userPasswordSignup(user: UserDto) {
         const user_check = await this.usersService.findByPhone(user.phone);
         if(user_check) throw new BadRequestException('Phone number already exists');
+        
         const passwordHash = await argon2.hash(user.password);
         const newUser = await this.usersService.create({
             ...user,
