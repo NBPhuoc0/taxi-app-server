@@ -81,8 +81,7 @@ export class UsersController {
   
   @Post('cancelOrder')
   async cancelOrder(@Req() req: RequestWithUser, @Body() body: { booking_id: string }) {
-    return this.ordersService.cancelOrder(req.user['sub'], body.booking_id);
+    return this.ordersService.cancelOrder(body.booking_id, req.user['sub']);
   }
 
-  
 }
