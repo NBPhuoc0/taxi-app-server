@@ -240,7 +240,7 @@ export class OrdersService {
           _id: 0,
         },
       },
-      { $sort: { _id: 1 } }
+      { $sort: { date: 1 } },
     ]).exec()
     return ordersByTime;
   }
