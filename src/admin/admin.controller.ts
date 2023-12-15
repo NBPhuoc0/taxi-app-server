@@ -117,9 +117,9 @@ export class AdminController {
     status: 200,
     description: 'return order',
   })
-  @Post('order')
-  createOrder(@Body() order: CreateOrderDto,@Body('userID') userID: string) {
-    return this.orderService.createByAdmin(userID, order);
+  @Post('orders')
+  createOrder(@Body() order: CreateOrderDto) {
+    return this.orderService.createByAdmin(order);
   }
 
   @ApiOkResponse({

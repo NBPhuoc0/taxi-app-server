@@ -17,7 +17,6 @@ export class CreateOrderDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    @IsNumber()
     source_location: {
         lat: number;
         long: number;
@@ -25,7 +24,6 @@ export class CreateOrderDto {
     
     @ApiProperty()
     @IsNotEmpty()
-    @IsNumber()
     destination_location: {
         lat: number;
         long: number;

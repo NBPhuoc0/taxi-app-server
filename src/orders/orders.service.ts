@@ -40,8 +40,8 @@ export class OrdersService {
   }
 
 
-  async createByAdmin(id:string, createOrderDto: CreateOrderDto) {
-    const newOrder = {...createOrderDto, user: id}
+  async createByAdmin(createOrderDto: CreateOrderDto) {
+    const newOrder = {...createOrderDto}
     const order = new this.orderModel(newOrder);
     return order.save();
   }
@@ -260,7 +260,7 @@ export class OrdersService {
     return{
       totalOrder: orders,
       orderPercentageChange: orderPercentageChange,
-      totalEarning: totalEarning[0].total ?? 0,
+      totalEarning: totalEarning && totalEarning.length > 0 ? totalEarning[0].total : 0,
       earningPercentageChange: earningPercentageChange,
       totalOrderCancelled: totalOrderCancelled,
       cancelledPercentageChange: cancelledPercentageChange,
