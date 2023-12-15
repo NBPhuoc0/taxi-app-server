@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 import { OrderStatus } from "../../utils/enums/oderstatus.enum";
 import { location } from "../../utils/interface/location.interface";
-import { Driver } from "src/drivers/schemas/driver.schema";
+import { Vehicle } from "src/utils/enums/vehicle.enum";
 
 export type OrderDocument = Order & Document;
 
@@ -16,6 +16,9 @@ export type OrderDocument = Order & Document;
 export class Order {
     @Prop({ default: OrderStatus.PENDING })
     orderStatus: OrderStatus
+
+    @Prop({ default: Vehicle.BIKE })
+    vehicle_type: Vehicle
 
     @Prop({ required: true })
     orderTotal: number

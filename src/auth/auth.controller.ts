@@ -123,7 +123,7 @@ export class AuthController {
     }
 
     @ApiOkResponse({
-        status: 200,
+        status: 200,  
         description: 'returns 200 status and return a refresh and access token',
     })
     @UseGuards(RefreshTokenGuard)

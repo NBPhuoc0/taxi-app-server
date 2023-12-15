@@ -25,7 +25,7 @@ export class OrdersService {
     const newOrder = {...createOrderDto, user: id}
     const order = new this.orderModel(newOrder);
     // this.eventEmitter.emit('order.new', order);
-    return order;
+    return order.save();
   }
   
   async cancelOrder(id: string, user: string) {
@@ -63,7 +63,7 @@ export class OrdersService {
 
   async findByid_userOrderComplete(id: string) {
     return await this.orderModel
-    .findOne({ user: id, orderStatus: OrderStatus.COMPLETED })
+    .find({ user: id, orderStatus: OrderStatus.COMPLETED })
     .exec();
   }
 

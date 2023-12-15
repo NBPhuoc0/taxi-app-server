@@ -1,7 +1,10 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber } from "class-validator";
-
+import { IsNotEmpty } from "class-validator";
+import { location } from "src/utils/interface/location.interface";
 export class CreateOrderDto {
+    @ApiProperty()
+    @IsNotEmpty()
+    vehicle_type: string;
 
     @ApiProperty()
     @IsNotEmpty()
@@ -13,21 +16,15 @@ export class CreateOrderDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    orderTotal: number;
-
-    @ApiProperty()
-    @IsNotEmpty()
-    source_location: {
-        lat: number;
-        long: number;
-    };
+    source_location: location;
     
     @ApiProperty()
     @IsNotEmpty()
-    destination_location: {
-        lat: number;
-        long: number;
-    };
+    destination_location: location;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    orderTotal: number;
 
     @ApiProperty()
     @IsNotEmpty()
@@ -36,9 +33,5 @@ export class CreateOrderDto {
     @ApiProperty()
     @IsNotEmpty()
     duration: number;
-
-    @ApiProperty()
-    @IsNotEmpty()
-    user: string;
 
 }

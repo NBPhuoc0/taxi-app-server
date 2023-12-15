@@ -96,10 +96,10 @@ export class DriversService {
     return driver
   }
 
-  async findById_location(id: string): Promise<location> {
-    const driver = await this.driverModel.findById(id).select('location').exec()
-
-    return driver.location
+  async findById_location(id: string) {
+    const driver = await this.driverModel.findById(id).exec()
+    let result = (({ id, fullname, phone, location }) => ({ id, fullname, phone, location }))(driver);
+    return result
   }
 
   async verify(id: string,status : boolean): Promise<DriverDocument> {

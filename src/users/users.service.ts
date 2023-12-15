@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { UserDto } from './dto/create-user.dto';
 import { AzureStorageService } from '../utils/auzre/storage-blob.service';
 import { FilterUserDto } from './dto/filter-user.dto';
+import { location } from 'src/utils/interface/location.interface';
 
 @Injectable()
 export class UsersService {
@@ -63,18 +64,16 @@ export class UsersService {
         }
     }
 
-    async findById(id: string): Promise<UserDocument> {
+    async findById(id: string) {
         const user = await this.userModel.findById(id).exec()
 
         if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
-
-        return user
+        let { password, ...result } = user.toJSON()
+        return result
     }
 
     async findById_location(id: string): Promise<UserDocument> {
         const location = await this.userModel.findById(id).select('location').exec()
-
-        if (!location) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
 
         return location
     }
@@ -82,12 +81,9 @@ export class UsersService {
     async findByPhone(phone: string): Promise<UserDocument> {
         const user = await this.userModel.findOne({ phone:phone }).exec()
 
-        if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
-
         return user
         
     }
-
 
     async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDocument>  {
         const user = await this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).exec()
@@ -107,8 +103,8 @@ export class UsersService {
         }
     }
 
-    async updateLocation(id: string, location: { lat: number, long: number }): Promise<UserDocument>  {
-        const user = await this.userModel.findByIdAndUpdate(id, {location : location}, { new: true }).exec()
+    async updateLocation(id: string, location: location): Promise<UserDocument>  {
+        const user = await this.userModel.findByIdAndUpdate(id, {location : location} ).exec()
 
         return user
     }
