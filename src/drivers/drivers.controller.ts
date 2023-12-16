@@ -4,7 +4,6 @@ import { UpdateDriverDto } from './dto/update-driver.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuardD } from 'src/utils/guards/accessTokenD.guard';
 import RequestWithDriver from 'src/utils/interface/requestWithDriver.interface';
-import { location } from 'src/utils/interface/location.interface';
 import { Status } from 'src/utils/enums/driverstatus.enum';
 import { OrdersService } from 'src/orders/orders.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
@@ -70,6 +69,16 @@ export class DriversController {
   @Patch('status')
   update_status(@Req() req: RequestWithDriver, @Body() status: Status) {
     return this.driversService.updateStatus(req.user['sub'], status);
+  }
+
+  @Sse('wait')
+  async sse(@Req() req: RequestWithDriver):Promise<Observable<MessageEvent<OrderDocument>>> {
+    const eventEmitter = await this.ordersService.getObservable(); 
+    return fromEvent(eventEmitter, 'trigger').pipe(
+      map((data : any ) => {
+        return new MessageEvent('ố dè', { data } );
+      }),
+    );
   }
 
   // @Sse('wait')

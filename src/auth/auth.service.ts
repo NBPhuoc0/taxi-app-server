@@ -28,16 +28,16 @@ export class AuthService {
 
     logger = new Logger('AuthService');
 
-    async signUpOTP_send(createUserDto: CreateUserDto_send): Promise<any> {
-        const user = await this.usersService.findByPhone(createUserDto.phone)
+    // async signUpOTP_send(createUserDto: CreateUserDto_send): Promise<any> {
+    //     const user = await this.usersService.findByPhone(createUserDto.phone)
 
-        if(user) throw new BadRequestException('Phone number already exists')
-        else {
-            const msg = await this.sendOTP(createUserDto.phone);
-            return msg;
-        }
+    //     if(user) throw new BadRequestException('Phone number already exists')
+    //     else {
+    //         const msg = await this.sendOTP(createUserDto.phone);
+    //         return msg;
+    //     }
         
-    }
+    // }
     
     // async signUpOTP_verify(createUserDto: CreateUserDto_verify): Promise<any> {
     //     const otp_check = await this.verifyOTP(createUserDto.phone, createUserDto.code);

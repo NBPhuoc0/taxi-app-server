@@ -13,15 +13,20 @@ export class OrdersService {
   constructor(
     @InjectModel(Order.name) 
     private readonly orderModel: Model<OrderDocument>,
-    // private eventEmitter: EventEmitter2,
+    private eventEmitter: EventEmitter2,
   ) {
   }
 
   logger = new Logger('OrdersService');
 
-  // async getObservable() {
-  //   return this.eventEmitter;
-  // }
+  async getObservable() {
+    return this.eventEmitter;
+  }
+
+  async triggerSSEvent(data: any,id : string) {
+    const result = {data: data, id_user: id}
+    this.eventEmitter.emit('trigger', result);
+  }
 
   async create(id:string,createOrderDto: CreateOrderDto) {
     const newOrder = {...createOrderDto, user: id}

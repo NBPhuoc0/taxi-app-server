@@ -88,4 +88,9 @@ export class UsersController {
     return this.ordersService.cancelOrder(body.booking_id, req.user['sub']);
   }
 
+  @Post('trigger')
+  async trigger(@Req() req: RequestWithUser, @Body() body: any) {
+    return this.ordersService.triggerSSEvent(body, req.user['sub']);
+  }
+
 }
