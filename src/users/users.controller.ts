@@ -48,8 +48,12 @@ export class UsersController {
   }
 
   @Patch('setLocation')
-  setLocation(@Req() req: RequestWithUser, @Body() body: {location: location}) {
-    return this.usersService.updateLocation(req.user['sub'], body.location);
+  setLocation(@Req() req: RequestWithUser, @Body() body: { lat: number, long: number }) {
+    const location = {
+      lat: body.lat,
+      long: body.long,
+    }
+    return this.usersService.updateLocation(req.user['sub'], location);
   }
 
   @Get('getHistory')
