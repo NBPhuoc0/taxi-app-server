@@ -97,20 +97,20 @@ export class DriversService {
   }
 
   async update(id: string, updateDriverDto: UpdateDriverDto) {
-    let result = 'fail';
+    let result;
     try {
       await this.driverModel.findByIdAndUpdate(id, updateDriverDto, { new: true }).exec()
-      return result = 'success';
+      return result = "success";
     } catch (error) {
       return result = error.message;
     }
   }
 
   async updateLocation(id: string, location: location) {
-    let result = 'fail';
+    let result;
     try {
-      await this.driverModel.findByIdAndUpdate(id, { location: location},{new: true} ).exec()
-      return result = 'success';
+      const driver = await this.driverModel.findByIdAndUpdate(id, { location: location},{new: true} ).exec()
+      return driver.location;
     } catch (error) {
       return result = error.message;
     }
