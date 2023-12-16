@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -13,13 +13,15 @@ export class OrdersService {
   constructor(
     @InjectModel(Order.name) 
     private readonly orderModel: Model<OrderDocument>,
-    private eventEmitter: EventEmitter2,
+    // private eventEmitter: EventEmitter2,
   ) {
   }
 
-  async getObservable() {
-    return this.eventEmitter;
-  }
+  logger = new Logger('OrdersService');
+
+  // async getObservable() {
+  //   return this.eventEmitter;
+  // }
 
   async create(id:string,createOrderDto: CreateOrderDto) {
     const newOrder = {...createOrderDto, user: id}
@@ -345,37 +347,47 @@ export class OrdersService {
   
   async getNearbyBookingRequest(location: location,distance_expect: number) {
     const orders = await this.orderModel.find({ orderStatus: OrderStatus.PENDING }).exec();
-    const nearbyOrders = orders.filter((order) => {
+    const nearbyOrders = orders.filter((value,index,array) => {
       const distance = this.getDistance(
         location.lat,
         location.long,
-        order.source_location.lat,
-        order.source_location.long,
+        value.source_location.lat,
+        value.source_location.long,
       );
-      return distance <= distance_expect ?? 25;
+      return distance < (distance_expect ?? 25) ;
     });
     return nearbyOrders;
   }
 
   async acceptBookingRequest(orderID: string, location: location, driverID: string) {
+    let result;
     const order = await this.orderModel.findById(orderID).exec();
     if (!order) throw new ConflictException('Order not found');
     if (order.orderStatus !== OrderStatus.PENDING) throw new ConflictException('Order is not waiting');
-    order.orderStatus = OrderStatus.INPROGRESS;
-    order.driver = driverID;
-    order.save();
-    // this.eventEmitter.emit('order.accept', order);
-    return order;
+    try {
+      order.orderStatus = OrderStatus.INPROGRESS;
+      order.driver = driverID;
+      order.save();
+      // this.eventEmitter.emit('order.accept', order);
+      return result = 'success';
+    } catch (error) {
+      return result = error.message;
+    }
   }
 
   async setCompleted(orderID: string, driverID: string) {
+    let result;
     const order = await this.orderModel.findById(orderID).exec();
     if (!order) throw new ConflictException('Order not found');
     if (order.orderStatus !== OrderStatus.INPROGRESS) throw new ConflictException('Order is not in progress');
-    order.orderStatus = OrderStatus.COMPLETED;
-    order.save();
-    // this.eventEmitter.emit('order.complete', order);
-    return order;
+    try {
+      order.orderStatus = OrderStatus.COMPLETED;
+      order.save();
+      // this.eventEmitter.emit('order.complete', order);
+      return result;
+    } catch (error) {
+      return result = error.message;
+    }
   }
 
 }

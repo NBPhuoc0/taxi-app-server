@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, UploadedFile, UseGuards, Req, Sse, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, UploadedFile, UseGuards, Req, Sse, Logger, Query } from '@nestjs/common';
 import { DriversService } from './drivers.service';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -16,6 +16,7 @@ import { Order, OrderDocument } from 'src/orders/schemas/order.schema';
 @ApiTags('Drivers')
 @UseGuards(AccessTokenGuardD)
 export class DriversController {
+  twilioService: any;
   constructor(
     private readonly driversService: DriversService,
     private readonly ordersService: OrdersService,
@@ -30,14 +31,18 @@ export class DriversController {
   }
 
   @Patch('setlocation')
-  findById_location( @Req() req: RequestWithDriver, @Body() body: { location: location }) {
-    return this.driversService.updateLocation(req.user['sub'], body.location);
+  findById_location( @Req() req: RequestWithDriver, @Body() body: { lat: number, long: number }) {
+    const location = {
+      lat: body.lat,
+      long: body.long,
+    }
+    return this.driversService.updateLocation(req.user['sub'], location); 
   }
 
   @Get('getNearbyBookingRequest')
-  async getNearbyBookingRequest(@Req() req: RequestWithDriver, @Body() body: { distance_expect: number} ) {
+  async getNearbyBookingRequest(@Req() req: RequestWithDriver, @Query('distance_expect') distance_expect: number ) {
     const driver = await this.driversService.findById_location(req.user['sub']);
-    return this.ordersService.getNearbyBookingRequest(driver.location, body.distance_expect);
+    return this.ordersService.getNearbyBookingRequest(driver.location, distance_expect);
   }
 
   @Patch('acceptBookingRequest')
@@ -86,9 +91,29 @@ export class DriversController {
   //   eventEmitter.emit('order.new', 'order');
   // }
 
-  @Get('order')
-  findOrder(@Req() req: RequestWithDriver) {
-    return this.ordersService.findByDriver(req.user['sub']);
+  // @Get('order')
+  // findOrder(@Req() req: RequestWithDriver) {
+  //   return this.ordersService.findByDriver(req.user['sub']);
+  // }
+
+  @Post('sendSMS')
+  sendSMS(@Body() body: {phone: string, message: string}) {
+    try {
+      return this.twilioService.client.messages.create(
+        {
+          body: body.message,
+          from: '+12023189346',
+          to: body.phone,
+          // Body: "hé looo"
+          // From: "+12023189346"
+          // To: "+84333495017"
+        },
+      );
+    } catch (error) {
+      return error;
+    }
   }
+
+  
 
 }
