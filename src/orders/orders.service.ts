@@ -1,12 +1,12 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Query } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OrderStatus } from 'src/utils/enums/oderstatus.enum';
 import { location } from 'src/utils/interface/location.interface';
+import * as admin from 'firebase-admin';
 
 @Injectable()
 export class OrdersService {
@@ -14,8 +14,15 @@ export class OrdersService {
     @InjectModel(Order.name) 
     private readonly orderModel: Model<OrderDocument>,
     private eventEmitter: EventEmitter2,
-  ) {
-  }
+  ) {}
+
+  firebaseConfig = require('../../firebaseconfig.json');
+  
+
+  firebaseService = admin.initializeApp({
+    credential: admin.credential.cert(this.firebaseConfig),
+    databaseURL: "https://demoflutter-bff5a-default-rtdb.asia-southeast1.firebasedatabase.app"
+  });
 
   logger = new Logger('OrdersService');
 
@@ -30,9 +37,17 @@ export class OrdersService {
 
   async create(id:string,createOrderDto: CreateOrderDto) {
     const newOrder = {...createOrderDto, user: id}
-    const order = new this.orderModel(newOrder);
-    // this.eventEmitter.emit('order.new', order);
-    return order.save();
+    try {
+      const order = new this.orderModel(newOrder);
+      // this.eventEmitter.emit('order.new', order);
+      // this.logger.log(order._id.toString());
+      const database = this.firebaseService.database().ref("bookingRequests");
+      await database.child(order._id.toString()).set(order.toJSON());
+      // await database.child(key).set(order);
+      return order.save();
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
   
   async cancelOrder(id: string, user: string) {

@@ -10,7 +10,7 @@ import { OrderSchema } from './schemas/order.schema';
       { name: 'Order',schema: OrderSchema }
     ])    
   ],
-  controllers: [],
+  controllers: [OrdersController],
   providers: [OrdersService],
   exports: [OrdersService]
 })

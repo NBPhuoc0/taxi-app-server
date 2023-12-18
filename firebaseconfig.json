@@ -1,0 +1,14 @@
+{
+    "type": "service_account",
+    "project_id": "demoflutter-bff5a",
+    "private_key_id": "ef43b4fddd5c760984fd65c8605c5a12f241b597",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDVhRNCQkImqUs3\n5bT66kHdbwPA0tNqFdTIwm/tf0IvFNbTtnwPE8lMI2b5tJ2ryDj7k3vkhHvNTt5o\nxLmFfRjZtqOR09OY/T6NwW/2FSAlRBJo/Te7XLDboAzof8xkIqGLQWyXB8Vcm1lo\n25c0gU7plszNPUTKW2BiYFV9wSzF4YC1lllo1i2TIgLjMgOOWlFHNtN7+TXb8x+m\n1nVmwuN4/3tWwCqIh7/0QosYl7sjK7ULyTMlDfYxbk+oHhO0o9/FbvAUXURRg+Jl\nmjUUPXHm6STaQgrLApNB2uw/im0nq7fLwUK5r3ZyO7AvBVCyhtVnr4sCFLFSkUEI\n8ebwQ92DAgMBAAECggEADqWibkapgnAIyWZYDzUkdiJOuxqbRxxrrHPuH3gkQm+N\nbX67E7VM3aZS3Fx//mmg3Kny2au4hGgQu++9Nd0gtPqhTauFL4PO/gSf5hBWVEgc\nDTJMCu3IvuAqH1ISls64KM6nOm5D7/gPxTCSUEpyIkMAFjCWq5Avur/jmkAddQ6r\nFwQ6ociVT20llZLhJueiVkYi/ti9R7kqFvt3ORYydlUICSU+5mCtY+m29CA/pHN9\nO3LcDfv/h/JBsYCfcXt3FwUudmxIn7YhjK8z3BvWb39YTOeNDuBk6xNMKF8wSIOW\n2JUIJxF2kYyQ9oY0FuJMcCdaid3T5T1/Y6DHp1xH3QKBgQDtvPjIwwDPezHgJx8v\nfsxIb0C9ETL1wj/dN43Pr2mTlfr7pLEqRBG25hY4TcCWjrio79QAmWZ/qlgbb7eL\nZnfGv0z2nph2l4uPj7dx9gqd3sDadTy8d9yCPE9q+B72ulWxZW8WAuls6ZnPaADU\n+iy4KJap5G1+C5eBe273fiTu1wKBgQDl69vuqRQP/sb4hAa84r82zsoJuDzz72Z0\nIdUAOX9RpQj/yP2gA8ws4ngIC9dPUNsctL4q0NlA2yiVQQg+PSmt4s6E8rYMBFoX\nfQF2p2LxXII0RmezTnWTo9LaYrc74i9s56tBOZU0zeKCDA1B6XjUBSV+JDtkR15v\nCJLKFT6NNQKBgElHq4Pun8xUk/4c8P7p3bwiFtlweL3KH3dnzV2MG0XzwAZbMITv\nsGopKAY46Tk/Suo/6qA4qKCHeFsUp4XfkuH/S5DlN+euNMWOriQBjCo3ZEiyRINv\nitfWEUDOtHSm4Q0qUAB/60W4B8Ins8HyT2CAmlhJ4fotRokR7BV7m5THAoGAf8Vm\n32ZOo+TuJcUZCXbo1EhutqAQH292/Cqg+BL70h9otNy5NWdm27qvAamy6X0Bhx5a\nX+jYEta34tnU/uF2fA+CvRc0W9E/T7ZETfAPaBoEsZA+qMJ9TKLJ1lrtgPXdbSQB\nY6ngZQvVSHfyFiLs5sZFY6g26S9QJ1wYVv0fWdECgYEAxtDdCFd8wVm3IQadmRBX\ndyPKPIA3Q+d7cr0lFeRN7lMdNoQzgqH85W94khdJQIqWPskf63/LBkdiseDstFeG\nWpOmLtpSiH5Sa/0KCjQvHO8D1P7oNyUeSi2EraS+WFq0HHcBg/b6TlmWjC084yGC\nRKRikDjQV87NM7wBbS9JXXA=\n-----END PRIVATE KEY-----\n",
+    "client_email": "demoflutter-bff5a@appspot.gserviceaccount.com",
+    "client_id": "108929592402338682027",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/demoflutter-bff5a%40appspot.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+  }
+  
