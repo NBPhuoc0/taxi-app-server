@@ -9,6 +9,7 @@ import { location } from '../utils/interface/location.interface';
 import {  filesUploadDTO } from './dto/files.dto';
 import { Status } from 'src/utils/enums/driverstatus.enum';
 import { FilterUserDto } from 'src/users/dto/filter-user.dto';
+import { log } from 'console';
 
 @Injectable()
 export class DriversService {
@@ -92,16 +93,24 @@ export class DriversService {
     return driver
   }
 
-  async update(id: string, updateDriverDto: UpdateDriverDto): Promise<DriverDocument> {
-    const driver = await this.driverModel.findByIdAndUpdate(id, updateDriverDto, { new: true }).exec()
-
-    return driver
+  async update(id: string, updateDriverDto: UpdateDriverDto) {
+    let result;
+    try {
+      await this.driverModel.findByIdAndUpdate(id, updateDriverDto, { new: true }).exec()
+      return result = "success";
+    } catch (error) {
+      return result = error.message;
+    }
   }
 
-  async updateLocation(id: string, location: location): Promise<DriverDocument> {
-    const driver = await this.driverModel.findByIdAndUpdate(id, { location: location }, { new: true }).exec()
-
-    return driver
+  async updateLocation(id: string, location: location) {
+    let result;
+    try {
+      const driver = await this.driverModel.findByIdAndUpdate(id, { location: location},{new: true} ).exec()
+      return driver.location;
+    } catch (error) {
+      return result = error.message;
+    }
   }
 
   async findById_location(id: string) {
@@ -137,13 +146,13 @@ export class DriversService {
     const totalRateCount = driver.totalRateCount + 1;
     const newRate = totalRate / totalRateCount;
 
-    const newDriver = await this.driverModel.findByIdAndUpdate(id, { rate: newRate, totalRate: totalRate, totalRateCount: totalRateCount }, { new: true }).exec()
+    await this.driverModel.findByIdAndUpdate(id, { rate: newRate, totalRate: totalRate, totalRateCount: totalRateCount }, { new: true }).exec()
 
-    return newDriver
+    return 
   }
 
   async driverRate(id: string) {
-    const driver = await this.driverModel.findById(id).select('rate').exec()
-    return driver.rate
+    await this.driverModel.findById(id).select('rate').exec()
+    return 
   }
 }

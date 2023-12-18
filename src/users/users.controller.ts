@@ -48,8 +48,12 @@ export class UsersController {
   }
 
   @Patch('setLocation')
-  setLocation(@Req() req: RequestWithUser, @Body() body: {location: location}) {
-    return this.usersService.updateLocation(req.user['sub'], body.location);
+  setLocation(@Req() req: RequestWithUser, @Body() body: { lat: number, long: number }) {
+    const location = {
+      lat: body.lat,
+      long: body.long,
+    }
+    return this.usersService.updateLocation(req.user['sub'], location);
   }
 
   @Get('getHistory')
@@ -82,6 +86,11 @@ export class UsersController {
   @Post('cancelOrder')
   async cancelOrder(@Req() req: RequestWithUser, @Body() body: { booking_id: string }) {
     return this.ordersService.cancelOrder(body.booking_id, req.user['sub']);
+  }
+
+  @Post('trigger')
+  async trigger(@Req() req: RequestWithUser, @Body() body: any) {
+    return this.ordersService.triggerSSEvent(body, req.user['sub']);
   }
 
 }

@@ -103,10 +103,13 @@ export class UsersService {
         }
     }
 
-    async updateLocation(id: string, location: location): Promise<UserDocument>  {
+    async updateLocation(id: string, location: location)  {
+       try {
         const user = await this.userModel.findByIdAndUpdate(id, {location : location} ).exec()
-
-        return user
+        return user.location
+       } catch (error) {
+        return error.message
+       }
     }
 
     async remove(id: string):  Promise<UserDocument> {
