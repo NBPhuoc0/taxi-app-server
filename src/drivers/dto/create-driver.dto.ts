@@ -24,8 +24,8 @@ export class CreateDriverDto {
     refreshToken: string
 
     location: {
-        latitude: number,
-        longitude: number
+        lat: number,
+        long: number
     }
 
 }

@@ -23,7 +23,7 @@ export class AuthService {
         private adminService: AdminService,
         private configService: ConfigService,
         private jwtService: JwtService,
-        private readonly twilioService: TwilioService
+        private readonly twilioService: TwilioService,
     ) {}
 
     logger = new Logger('AuthService');
@@ -56,6 +56,27 @@ export class AuthService {
 
 
 
+    async signUpOTP_Driver(authDto: AuthDto_send) {
+        const driver = await this.driverService.findByPhone(authDto.phone);
+        if(driver){
+            throw new BadRequestException('Phone number already exists')
+        } else {
+            const msg = await this.sendOTP(authDto.phone);
+            return msg;
+        }
+    }
+
+    async signUp_driver_verifyOTP(authDto: AuthDto_verify) {
+        if (await this.verifyOTP(authDto.phone, authDto.code)) {
+            return{
+                error: false,
+                msg: 'OTP is correct',
+            }
+        } else {
+            throw new BadRequestException('OTP is not correct')
+        }
+    }
+
     async signInOTP_send(authDto: AuthDto_send) {
         const user = await this.usersService.findByPhone(authDto.phone)
 
@@ -77,8 +98,6 @@ export class AuthService {
         }
         // return this.verifyOTP(authDto.phone, authDto.code);
     }
-
-
 
     async sendOTP(phone: string) {
         let msg ;
@@ -204,16 +223,19 @@ export class AuthService {
         return { ...tokens};
     }
 
-    async driverSignup(createDriverDto: CreateDriverDto, files: filesUploadDTO): Promise<any> {
+    async driverSignup(createDriverDto: CreateDriverDto): Promise<any> {
         const driver = await this.driverService.findByPhone(createDriverDto.phone);
-        if(driver) throw new NotFoundException('Phone of driver already exists');
+        if(driver) throw new BadRequestException('Phone number already exists');
 
         const passwordHash = await argon2.hash(createDriverDto.password);
 
-        this.driverService.create({...createDriverDto,password:passwordHash}, files);
+        const newDriver = await this.driverService.create({...createDriverDto,password:passwordHash});
 
-        const token = this.getTokens(driver._id,'driver');
-        return token;
+        const token = this.getTokens(newDriver._id,'driver');
+
+        await this.updateRefreshTokenD(newDriver._id, (await token).refreshToken)
+
+        return { ...token };
     }
 
     async driverSignin(dto: AuthDto_pass_driver) {

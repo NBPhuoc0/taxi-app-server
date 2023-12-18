@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -42,7 +42,15 @@ export class DriversService {
     };
   }
 
-  async create(createDriverDto: CreateDriverDto, files: filesUploadDTO) {
+  async create(createDriverDto: CreateDriverDto):Promise<DriverDocument> {
+    try {
+      return await new this.driverModel({ ...createDriverDto }).save();
+    } catch (error) {
+      throw new BadRequestException('Create driver account failed')
+    }
+  }
+
+  async updateProfile(createDriverDto: CreateDriverDto, files: filesUploadDTO) {
     try {
       const newDriver = await new this.driverModel(createDriverDto);
 

@@ -54,6 +54,34 @@ export class AuthController {
     // }
 
     @ApiBody({
+        description: 'Check if phone number is registered then send OTP',
+        type: CreateUserDto_send,
+        
+    })
+    @ApiOkResponse({
+        status: 200,
+        description: 'returns 200 status when phone number is valid and sends OTP',
+    })
+    @Post('driver/signup-send-otp')
+    signup_otp_driver(@Body() data: AuthDto_send) {
+      return this.authService.signUpOTP_Driver(data);
+    }
+
+    @ApiBody({
+      description: 'verify otp',
+      type: AuthDto_verify,
+      
+    })
+    @ApiCreatedResponse({
+        status: 200,
+        description: 'return verified message',
+    })
+    @Post('driver/signup-verify-otp')
+    signup_driver_verifyOTP(@Body() otpDriver: AuthDto_verify) {
+      return this.authService.signUp_driver_verifyOTP(otpDriver);
+    }
+
+    @ApiBody({
         description: 'Contains properties to create User',
         type: CreateUserDto_verify,
         
@@ -135,21 +163,26 @@ export class AuthController {
     }
 
 
+    // @Post('driver/signup')
+    // @UseInterceptors(FileFieldsInterceptor([
+    //   { name: 'avatar', maxCount: 1 },
+    //   { name: 'vehicleImage', maxCount: 1 },
+    //   { name: 'Cavet_f', maxCount: 1 },
+    //   { name: 'Cavet_b', maxCount: 1 },
+    //   { name: 'identification_card_f', maxCount: 1 },
+    //   { name: 'identification_card_b', maxCount: 1 },
+    //   { name: 'license_image_f', maxCount: 1 },
+    //   { name: 'license_image_b', maxCount: 1 },
+    // ]))
+    // signupDriver(
+    //   @UploadedFiles() files: filesUploadDTO,
+    //   @Body() createDriverDto: CreateDriverDto) {
+    //   return this.authService.driverSignup(createDriverDto, files);
+    // }
+
     @Post('driver/signup')
-    @UseInterceptors(FileFieldsInterceptor([
-      { name: 'avatar', maxCount: 1 },
-      { name: 'vehicleImage', maxCount: 1 },
-      { name: 'Cavet_f', maxCount: 1 },
-      { name: 'Cavet_b', maxCount: 1 },
-      { name: 'identification_card_f', maxCount: 1 },
-      { name: 'identification_card_b', maxCount: 1 },
-      { name: 'license_image_f', maxCount: 1 },
-      { name: 'license_image_b', maxCount: 1 },
-    ]))
-    signupDriver(
-      @UploadedFiles() files: filesUploadDTO,
-      @Body() createDriverDto: CreateDriverDto) {
-      return this.authService.driverSignup(createDriverDto, files);
+    signup_driver(@Body() newDriver: CreateDriverDto){
+      return this.authService.driverSignup(newDriver);
     }
 
     @Post('driver/signin')
