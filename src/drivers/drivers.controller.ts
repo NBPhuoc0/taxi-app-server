@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, UploadedFile, UseGuards, Req, Sse, Logger, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, UploadedFile, UseGuards, Req, Sse, Logger, Query, Put } from '@nestjs/common';
 import { DriversService } from './drivers.service';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -9,6 +9,8 @@ import { OrdersService } from 'src/orders/orders.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Observable, fromEvent, map } from 'rxjs';
 import { Order, OrderDocument } from 'src/orders/schemas/order.schema';
+import { filesUploadDTO } from './dto/files.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('drivers')
 @ApiBearerAuth()
@@ -81,6 +83,22 @@ export class DriversController {
     );
   }
 
+  @Patch('image-profile')
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'vehicleImage', maxCount: 1 },
+    { name: 'Cavet_f', maxCount: 1 },
+    { name: 'Cavet_b', maxCount: 1 },
+    { name: 'identification_card_f', maxCount: 1 },
+    { name: 'identification_card_b', maxCount: 1 },
+    { name: 'license_image_f', maxCount: 1 },
+    { name: 'license_image_b', maxCount: 1 },
+  ]))
+  updateProfile(
+    @Req() req: RequestWithDriver,
+    @UploadedFiles() files?: filesUploadDTO) {
+    return this.driversService.updateProfile(req.user['sub'], files);
+  }
   // @Sse('wait')
   // @OnEvent('order.new')
   // async sse(@Req() req: RequestWithDriver):Promise<Observable<MessageEvent<OrderDocument>>> {

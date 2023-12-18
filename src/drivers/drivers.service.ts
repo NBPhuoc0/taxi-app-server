@@ -51,33 +51,45 @@ export class DriversService {
     }
   }
 
-  async updateProfile(createDriverDto: CreateDriverDto, files: filesUploadDTO) {
+  async updateProfile(id: string, files?: filesUploadDTO) {
     try {
-      const newDriver = await new this.driverModel(createDriverDto);
-
-      const avatarURL = await this.azureStorage.uploadFile(files.avatar[0], 'driveravatar', newDriver._id);
-      const vehicleImageURL = await this.azureStorage.uploadFile(files.vehicleImage[0], 'vehicleimage', newDriver._id);
-      const Cavet_fURL = await this.azureStorage.uploadFile(files.Cavet_f[0], 'cavetf', newDriver._id);
-      const Cavet_bURL = await this.azureStorage.uploadFile(files.Cavet_b[0], 'cavetb', newDriver._id);
-      const identification_card_fURL = await this.azureStorage.uploadFile(files.identification_card_f[0], 'identificationcardf', newDriver._id);
-      const identification_card_bURL = await this.azureStorage.uploadFile(files.identification_card_b[0], 'identificationcardb', newDriver._id);
-      const license_image_fURL = await this.azureStorage.uploadFile(files.license_image_f[0], 'licenseimagef', newDriver._id);
-      const license_image_bURL = await this.azureStorage.uploadFile(files.license_image_b[0], 'licenseimageb', newDriver._id);
-
-      newDriver.avatar = avatarURL; 
-      newDriver.vehicleImage = vehicleImageURL;
-      newDriver.Cavet_f = Cavet_fURL;
-      newDriver.Cavet_b = Cavet_bURL;
-      newDriver.identification_card_f = identification_card_fURL;
-      newDriver.identification_card_b = identification_card_bURL;
-      newDriver.license_image_f = license_image_fURL;
-      newDriver.license_image_b = license_image_bURL;
-      
-      return await newDriver.save();
+      let driver = await this.driverModel.findById(id)
+      if(files?.avatar){
+        const avatarURL = await this.azureStorage.uploadFile(files.avatar[0], 'driveravatar', driver._id);
+        driver.avatar = avatarURL; 
+      }
+      if(files?.vehicleImage){
+        const vehicleImageURL = await this.azureStorage.uploadFile(files.vehicleImage[0], 'vehicleimage', driver._id);
+        driver.vehicleImage = vehicleImageURL;
+      }
+      if(files?.Cavet_f){
+        const Cavet_fURL = await this.azureStorage.uploadFile(files.Cavet_f[0], 'cavetf', driver._id);
+        driver.Cavet_f = Cavet_fURL;
+      }
+      if(files?.Cavet_b){
+        const Cavet_bURL = await this.azureStorage.uploadFile(files.Cavet_b[0], 'cavetb', driver._id);
+        driver.Cavet_b = Cavet_bURL;
+      }
+      if(files?.identification_card_f){
+        const identification_card_fURL = await this.azureStorage.uploadFile(files.identification_card_f[0], 'identificationcardf', driver._id);
+        driver.identification_card_f = identification_card_fURL;
+      }
+      if(files?.identification_card_b){
+        const identification_card_bURL = await this.azureStorage.uploadFile(files.identification_card_b[0], 'identificationcardb', driver._id);
+        driver.identification_card_b = identification_card_bURL;
+      }
+      if(files?.license_image_f){
+        const license_image_fURL = await this.azureStorage.uploadFile(files.license_image_f[0], 'licenseimagef', driver._id);
+        driver.license_image_f = license_image_fURL;
+      }
+      if(files?.license_image_b){
+        const license_image_bURL = await this.azureStorage.uploadFile(files.license_image_b[0], 'licenseimageb', driver._id);
+        driver.license_image_b = license_image_bURL;
+      }
+      return driver.save();
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
-  
   }
 
 
