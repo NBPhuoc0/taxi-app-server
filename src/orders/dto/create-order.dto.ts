@@ -1,7 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty } from "class-validator";
 import { location } from "src/utils/interface/location.interface";
-
 export class CreateOrderDto {
     @ApiProperty()
     @IsNotEmpty()

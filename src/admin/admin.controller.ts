@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req, Put } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuardA } from 'src/utils/guards/accessTokenA.guard';
@@ -66,7 +66,33 @@ export class AdminController {
     return this.driverService.findById(query.id);
   }
 
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns Driver ',
+  })
+  @Patch('driver/verify')
+  async verifyDriverAccount(@Body('id') id: string, @Body('status') status: boolean) {
+    const updateDriver = await this.driverService.verify(id, status);
+    if(!updateDriver){
+      return {
+        error: true,
+        msg: 'Failed to update verification status'
+      }
+    }
+    else return updateDriver;
+  }
+
   // ORDER
+  
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns list of drivers',
+  })
+  @Get('orders/top-drivers')
+  async getTopDrivers() {
+    return this.orderService.findTopDrivers();
+  }
+
   @ApiOkResponse({
     status: 200,
     description: 'returns list of orders ',
@@ -107,9 +133,9 @@ export class AdminController {
     status: 200,
     description: 'return order',
   })
-  @Post('order')
-  createOrder(@Body() order: CreateOrderDto,@Body('userID') userID: string) {
-    return this.orderService.createByAdmin(userID, order);
+  @Post('orders')
+  createOrder(@Body() order: CreateOrderDto) {
+    return this.orderService.createByAdmin(order);
   }
 
   @ApiOkResponse({
@@ -130,13 +156,42 @@ export class AdminController {
     return this.orderService.findByid(query.id);
   }
 
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns statistics',
+  })
+  @Get('orders/statistics')
+  async getStatisticsByAdmin() {
+    const statisticsOrders = await this.orderService.statisticsByAdmin();
+    return statisticsOrders;
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns list of order locations',
+  })
+  @Get('orders/in-progress')
+  async getOrderInProgress() {
+    return this.orderService.findOrderInProgress();
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns list of order locations',
+  })
+  @Get('orders/by-time')
+  async getOrdersByTime(@Query() query: { year?: string, month?: string }) {
+    return this.orderService.ordersByTime(query.year, query.month);
+  }
+
+  //
   @Post('sms')
   sendSMS(@Body() body: {phone: string, message: string}) {
     try {
       return this.twilioService.client.messages.create(
         {
           body: body.message,
-          from: '+12023189346',
+          from: '+12058436918',
           to: body.phone,
           // Body: "hé looo"
           // From: "+12023189346"

@@ -41,10 +41,10 @@ export class Order {
     @Prop({})
     duration: number;
 
-    @Prop({})
+    @Prop({ref: 'Driver'})
     driver: string
 
-    @Prop({})
+    @Prop({ref: 'User'})
     user: string
 }
 
