@@ -7,6 +7,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OrderStatus } from 'src/utils/enums/oderstatus.enum';
 import { location } from 'src/utils/interface/location.interface';
 import * as admin from 'firebase-admin';
+import { CreateOrderByAdminDto } from './dto/create-order-admin.dto';
 
 @Injectable()
 export class OrdersService {
@@ -55,6 +56,8 @@ export class OrdersService {
     if (!order) throw new ConflictException('Order not found');
     if (order.user.toString() !== user) throw new ConflictException('User dont have permission to cancel this order');
     if (order.orderStatus !== OrderStatus.PENDING) throw new ConflictException('Order is not waiting');
+    const database = this.firebaseService.database().ref("bookingRequests");
+    await database.child(order._id.toString()).remove();
     order.orderStatus = OrderStatus.CANCEL;
     order.save();
     // this.eventEmitter.emit('order.cancel', order);
@@ -62,17 +65,18 @@ export class OrdersService {
   }
 
 
-  async createByAdmin(createOrderDto: CreateOrderDto) {
-    const newOrder = {...createOrderDto}
-    const order = new this.orderModel(newOrder);
+  async createByAdmin(createOrderDto: CreateOrderByAdminDto) {
+    const order = new this.orderModel(createOrderDto)
     return order.save();
   }
 
   async findByid(id: string) {
-    return await this.orderModel.findById(id).populate({
+    const order = await this.orderModel.findById(id).exec();
+    const order_user = await this.orderModel.findById(id).populate({
       path: 'user driver',
       select: 'fullname phone avatar vehicleImage',
     }).exec();
+    return order_user.user!=null ? order_user : order
   }
 
   async findByid_driver(id: string) {
@@ -546,6 +550,8 @@ export class OrdersService {
     if (!order) throw new ConflictException('Order not found');
     if (order.orderStatus !== OrderStatus.PENDING) throw new ConflictException('Order is not waiting');
     try {
+      const database = this.firebaseService.database().ref("bookingRequests");
+      await database.child(order._id.toString()).remove();
       order.orderStatus = OrderStatus.INPROGRESS;
       order.driver = driverID;
       order.save();
