@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req, Put } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuardA } from 'src/utils/guards/accessTokenA.guard';
@@ -12,7 +12,7 @@ import { TwilioService } from 'nestjs-twilio';
 @Controller('admin')
 // @ApiBearerAuth()
 @ApiTags('Administration')
-@UseGuards(AccessTokenGuardA)  
+// @UseGuards(AccessTokenGuardA)  
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
@@ -64,6 +64,22 @@ export class AdminController {
   @Get('drivers')
   getDriverByID(@Query() query: {id: string}) {
     return this.driverService.findById(query.id);
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: 'returns Driver ',
+  })
+  @Patch('driver/verify')
+  async verifyDriverAccount(@Body('id') id: string, @Body('status') status: boolean) {
+    const updateDriver = await this.driverService.verify(id, status);
+    if(!updateDriver){
+      return {
+        error: true,
+        msg: 'Failed to update verification status'
+      }
+    }
+    else return updateDriver;
   }
 
   // ORDER

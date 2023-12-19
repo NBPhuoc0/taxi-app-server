@@ -253,79 +253,100 @@ export class OrdersService {
   }
 
   async statisticsByUser(userID: string){
-    const date = new Date();
-    date.setDate(new Date().getDate()-1);
-    const currDate = new Date().toISOString().slice(0,10);
-    const preDate = date.toISOString().slice(0,10)
+    try {
+      const date = new Date();
+      date.setDate(new Date().getDate()-1);
+      const currDate = new Date().toISOString().slice(0,10);
+      const preDate = date.toISOString().slice(0,10)
 
-    const orders = await this.orderModel.find({ user: userID }).count().exec();
-    const totalEarning = await this.getToTalEarningByID(userID, '');
-    const totalOrderCancelled = await this.orderModel.find({ user: userID, orderStatus: OrderStatus.CANCEL}).count().exec();
-    const orderPercentageChange = await this.getOrderPercentageChange(currDate, preDate, userID, '');
-    const earningPercentageChange  = await this.getEarningPercentageChange(currDate, preDate, userID, '');
-    const cancelledPercentageChange = await this.getCancelledPercentageChange( currDate, preDate, userID, '' );
-    return{
-      totalOrder: orders,
-      orderPercentageChange: orderPercentageChange,
-      totalEarning: totalEarning && totalEarning.length > 0 ? totalEarning[0].total : 0,
-      earningPercentageChange: earningPercentageChange,
-      totalOrderCancelled: totalOrderCancelled,
-      cancelledPercentageChange: cancelledPercentageChange,
+      const orders = await this.orderModel.find({ user: userID }).count().exec();
+      const totalEarning = await this.getToTalEarningByID(userID, '');
+      const totalOrderCancelled = await this.orderModel.find({ user: userID, orderStatus: OrderStatus.CANCEL}).count().exec();
+      const orderPercentageChange = await this.getOrderPercentageChange(currDate, preDate, userID, '');
+      const earningPercentageChange  = await this.getEarningPercentageChange(currDate, preDate, userID, '');
+      const cancelledPercentageChange = await this.getCancelledPercentageChange( currDate, preDate, userID, '' );
+      return{
+        totalOrder: orders,
+        orderPercentageChange: orderPercentageChange,
+        totalEarning: totalEarning && totalEarning.length > 0 ? totalEarning[0].total : 0,
+        earningPercentageChange: earningPercentageChange,
+        totalOrderCancelled: totalOrderCancelled,
+        cancelledPercentageChange: cancelledPercentageChange,
+      }
+    } catch (error) {
+      return {
+        error: true,
+        msg: 'Get statistics failed'
+      }
     }
   }
 
   async statisticsByDriver(driverID: string){
-    const date = new Date();
-    date.setDate(new Date().getDate()-1);
-    const currDate = new Date().toISOString().slice(0,10);
-    const preDate = date.toISOString().slice(0,10)
+    try {
+      const date = new Date();
+      date.setDate(new Date().getDate()-1);
+      const currDate = new Date().toISOString().slice(0,10);
+      const preDate = date.toISOString().slice(0,10)
 
-    const orders = await this.orderModel.find({ driver: driverID }).count().exec();
-    const totalEarning = await this.getToTalEarningByID('',driverID);
-    const totalOrderCancelled = await this.orderModel.find({ driver: driverID, orderStatus: OrderStatus.CANCEL}).count().exec();
-    const orderPercentageChange = await this.getOrderPercentageChange( currDate, preDate, '', driverID );
-    const earningPercentageChange  = await this.getEarningPercentageChange( currDate, preDate, '', driverID );
-    const cancelledPercentageChange = await this.getCancelledPercentageChange( currDate, preDate, '', driverID );
-    return{
-      totalOrder: orders,
-      orderPercentageChange: orderPercentageChange,
-      totalEarning: totalEarning[0].total ?? 0,
-      earningPercentageChange: earningPercentageChange,
-      totalOrderCancelled: totalOrderCancelled,
-      cancelledPercentageChange: cancelledPercentageChange,
+      const orders = await this.orderModel.find({ driver: driverID }).count().exec();
+      const totalEarning = await this.getToTalEarningByID('',driverID);
+      const totalOrderCancelled = await this.orderModel.find({ driver: driverID, orderStatus: OrderStatus.CANCEL}).count().exec();
+      const orderPercentageChange = await this.getOrderPercentageChange( currDate, preDate, '', driverID );
+      const earningPercentageChange  = await this.getEarningPercentageChange( currDate, preDate, '', driverID );
+      const cancelledPercentageChange = await this.getCancelledPercentageChange( currDate, preDate, '', driverID );
+      return{
+        totalOrder: orders,
+        orderPercentageChange: orderPercentageChange,
+        totalEarning: totalEarning[0].total ?? 0,
+        earningPercentageChange: earningPercentageChange,
+        totalOrderCancelled: totalOrderCancelled,
+        cancelledPercentageChange: cancelledPercentageChange,
+      }
+    } catch (error) {
+      return {
+        error: true,
+        msg: 'Get statistics failed'
+      }
     }
   }
 
   async statisticsByAdmin(){
-    const date = new Date();
-    date.setDate(new Date().getDate()-1);
-    const currDate = new Date().toISOString().slice(0,10);
-    const preDate = date.toISOString().slice(0,10)
+    try {
+      const date = new Date();
+      date.setDate(new Date().getDate()-1);
+      const currDate = new Date().toISOString().slice(0,10);
+      const preDate = date.toISOString().slice(0,10)
 
-    const totalOrders = await this.orderModel.find().count().exec();
-    const totalOrderCancelled = await this.orderModel.find({ orderStatus: OrderStatus.CANCEL }).count().exec();
-    const totalEarning = await this.orderModel.aggregate([
-      { $group: {
-          _id: null,
-          total: { $sum: '$orderTotal' }
+      const totalOrders = await this.orderModel.find().count().exec();
+      const totalOrderCancelled = await this.orderModel.find({ orderStatus: OrderStatus.CANCEL }).count().exec();
+      const totalEarning = await this.orderModel.aggregate([
+        { $group: {
+            _id: null,
+            total: { $sum: '$orderTotal' }
+          }
         }
+      ]).exec();
+
+      const orderPercentageChange = await this.getOrderPercentageChange(currDate, preDate);
+      const earningPercentageChange = await this.getEarningPercentageChange(currDate, preDate);
+      const cancelledPercentageChange = await this.getCancelledPercentageChange(currDate, preDate);
+      const percentOrderCompleted = await this.findOrdersCompleted();
+
+      return {
+        totalOrder: totalOrders,
+        orderPercentageChange: orderPercentageChange,
+        totalEarning: totalEarning[0].total ?? 0,
+        earningPercentageChange: earningPercentageChange,
+        totalOrderCancelled: totalOrderCancelled,
+        cancelledPercentageChange: cancelledPercentageChange,
+        percentOrderCompleted: percentOrderCompleted
+      };
+    } catch (error) {
+      return {
+        error: true,
+        msg: 'Get statistics failed'
       }
-    ]).exec();
-
-    const orderPercentageChange = await this.getOrderPercentageChange(currDate, preDate);
-    const earningPercentageChange = await this.getEarningPercentageChange(currDate, preDate);
-    const cancelledPercentageChange = await this.getCancelledPercentageChange(currDate, preDate);
-    const percentOrderCompleted = await this.findOrdersCompleted();
-
-    return {
-      totalOrder: totalOrders,
-      orderPercentageChange: orderPercentageChange,
-      totalEarning: totalEarning[0].total ?? 0,
-      earningPercentageChange: earningPercentageChange,
-      totalOrderCancelled: totalOrderCancelled,
-      cancelledPercentageChange: cancelledPercentageChange,
-      percentOrderCompleted: percentOrderCompleted
-    };
+    }
   }
 
   async findOrderInProgress(){

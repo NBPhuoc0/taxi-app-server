@@ -3,7 +3,7 @@ import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Driver, DriverDocument } from './schemas/driver.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { AzureStorageService } from '../utils/auzre/storage-blob.service';
 import { location } from '../utils/interface/location.interface';
 import {  filesUploadDTO } from './dto/files.dto';
@@ -131,7 +131,7 @@ export class DriversService {
     return result
   }
 
-  async verify(id: string,status : boolean): Promise<DriverDocument> {
+  async verify(id: string, status: boolean): Promise<DriverDocument>{
     const driver = await this.driverModel.findByIdAndUpdate(id, { isVerified: status}, { new: true }).exec()
     
     return driver
