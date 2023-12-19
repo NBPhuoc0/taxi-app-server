@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req, Put, Logger } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuardA } from 'src/utils/guards/accessTokenA.guard';
@@ -8,6 +8,8 @@ import { OrdersService } from 'src/orders/orders.service';
 import { FilterUserDto } from 'src/users/dto/filter-user.dto';
 import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
 import { TwilioService } from 'nestjs-twilio';
+import { CreateOrderByAdminDto } from 'src/orders/dto/create-order-admin.dto';
+import { log } from 'console';
 
 @Controller('admin')
 // @ApiBearerAuth()
@@ -22,7 +24,7 @@ export class AdminController {
     private readonly twilioService: TwilioService,
   ) {}
 
-
+  logger = new Logger()
   @Post()
   create_admin(@Body() createAdminDto: any) {
     return this.adminService.create(createAdminDto);
@@ -134,7 +136,7 @@ export class AdminController {
     description: 'return order',
   })
   @Post('orders')
-  createOrder(@Body() order: CreateOrderDto) {
+  createOrder(@Body() order: CreateOrderByAdminDto) {
     return this.orderService.createByAdmin(order);
   }
 
