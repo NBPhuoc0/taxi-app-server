@@ -56,6 +56,8 @@ export class OrdersService {
     if (!order) throw new ConflictException('Order not found');
     if (order.user.toString() !== user) throw new ConflictException('User dont have permission to cancel this order');
     if (order.orderStatus !== OrderStatus.PENDING) throw new ConflictException('Order is not waiting');
+    const database = this.firebaseService.database().ref("bookingRequests");
+    await database.child(order._id.toString()).remove();
     order.orderStatus = OrderStatus.CANCEL;
     order.save();
     // this.eventEmitter.emit('order.cancel', order);
@@ -548,6 +550,8 @@ export class OrdersService {
     if (!order) throw new ConflictException('Order not found');
     if (order.orderStatus !== OrderStatus.PENDING) throw new ConflictException('Order is not waiting');
     try {
+      const database = this.firebaseService.database().ref("bookingRequests");
+      await database.child(order._id.toString()).remove();
       order.orderStatus = OrderStatus.INPROGRESS;
       order.driver = driverID;
       order.save();
