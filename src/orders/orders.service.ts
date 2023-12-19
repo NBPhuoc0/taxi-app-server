@@ -66,8 +66,14 @@ export class OrdersService {
 
 
   async createByAdmin(createOrderDto: CreateOrderByAdminDto) {
-    const order = new this.orderModel(createOrderDto)
-    return order.save();
+    try {
+      const order = new this.orderModel(createOrderDto)
+      const database = this.firebaseService.database().ref("bookingRequests");
+      await database.child(order._id.toString()).set(order.toJSON());
+      return order.save(); 
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async findByid(id: string) {
