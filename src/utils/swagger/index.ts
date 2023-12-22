@@ -32,15 +32,14 @@ export function setupSwagger(app: INestApplication): void {
     };
     const document = SwaggerModule.createDocument(app, config, options);
     SwaggerModule.setup(SWAGGER_API_ROOT, app, document, {
-        customfavIcon: 'https://cdn-icons-png.flaticon.com/512/10095/10095455.png',
+        customfavIcon: 'https://gopstorage0.blob.core.windows.net/appicon/logo.png',
         customJs: [
-          'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
-          'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js',
+          'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui-bundle.min.js',
+          'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui-standalone-preset.min.js',
         ],
         customCssUrl: [
-          'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
-          'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.css',
-          'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.css',
+          'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui.min.css',
+          'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui.css',
         ],
       }
     );
