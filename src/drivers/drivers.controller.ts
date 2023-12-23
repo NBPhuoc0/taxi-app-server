@@ -49,7 +49,9 @@ export class DriversController {
   @Patch('acceptBookingRequest')
   async acceptBookingRequest(@Req() req: RequestWithDriver, @Body() body: { order: string}) {
     const driver = await this.driversService.findById_location(req.user['sub']);
-    return this.ordersService.acceptBookingRequest(body.order, driver.location, req.user['sub']);
+    let result = {massage: ''};
+    result.massage = await this.ordersService.acceptBookingRequest(body.order, driver.location, req.user['sub']);
+    return result;
   }
 
   @Get('getHistory')
