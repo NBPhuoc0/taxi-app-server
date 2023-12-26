@@ -12,9 +12,9 @@ import { CreateOrderByAdminDto } from 'src/orders/dto/create-order-admin.dto';
 import { log } from 'console';
 
 @Controller('admin')
-// @ApiBearerAuth()
+@ApiBearerAuth()
 @ApiTags('Administration')
-// @UseGuards(AccessTokenGuardA)  
+@UseGuards(AccessTokenGuardA)  
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
@@ -184,6 +184,24 @@ export class AdminController {
   @Get('orders/by-time')
   async getOrdersByTime(@Query() query: { year?: string, month?: string }) {
     return this.orderService.ordersByTime(query.year, query.month);
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: '',
+  })
+  @Delete('orders/delete')
+  async deletaOrder(@Query() query: { id: string }) {
+    return this.orderService.cancelOrderByAdmin(query.id);
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    description: '',
+  })
+  @Post('orders/delete')
+  async deletaListOrder(@Body() body: {id: string[]}) {
+    return this.orderService.cancelListOrderByAdmin(body.id);
   }
 
   //

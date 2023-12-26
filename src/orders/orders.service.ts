@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Query } from 'mongoose';
@@ -71,6 +71,63 @@ export class OrdersService {
       const database = this.firebaseService.database().ref("bookingRequests");
       await database.child(order._id.toString()).set(order.toJSON());
       return order.save(); 
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async cancelOrderByAdmin(id: string){
+    const order = await this.orderModel.findById(id).exec();
+    if (!order) throw new ConflictException('Order not found');
+    if (order.orderStatus !== OrderStatus.PENDING) 
+      throw new ConflictException('Order is not waiting');
+    const database = this.firebaseService.database().ref("bookingRequests");
+    await database.child(order._id.toString()).remove();
+    order.orderStatus = OrderStatus.CANCEL;
+    order.save();
+    return order;
+  }
+
+  async cancelListOrderByAdmin(orderID: string[]){
+    try {
+      if(orderID.length > 1){
+        orderID.forEach(async (id) => {
+          const order = await this.orderModel.findById(id).exec();
+          if (!order) throw new ConflictException('Order not found');
+          if (order.orderStatus !== OrderStatus.PENDING) 
+            throw new ConflictException('Order is not waiting');
+          const database = this.firebaseService.database().ref("bookingRequests");
+          await database.child(order._id.toString()).remove();
+          order.orderStatus = OrderStatus.CANCEL;
+          order.save();
+        })
+        return {
+          err: false,
+          msg: 'Successfully deleted'
+        }
+      }
+      else{
+        return {
+          err: true,
+          msg: 'list orders not empty'
+        }
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async deleteOrder(id: string){
+    try {
+      const order = await this.orderModel.findById(id).exec();
+      if (!order) {
+        throw new NotFoundException(`Order with ID not found`);
+      }
+      await this.orderModel.findByIdAndRemove(id)
+      return {
+        err: false,
+        msg: 'Successfully deleted'
+      }
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
