@@ -59,7 +59,9 @@ export class DriversController {
 
   @Patch('setCompleted')
   async setCompleted(@Req() req: RequestWithDriver, @Body() body: { order: string}) {
-    return this.ordersService.setCompleted(body.order, req.user['sub']);
+    let result = {massage: ''};
+    result.massage = await this.ordersService.setCompleted(body.order, req.user['sub']);
+    return result;
   }
 
 

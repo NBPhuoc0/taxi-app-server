@@ -402,13 +402,14 @@ export class OrdersService {
   async setCompleted(orderID: string, driverID: string) {
     let result;
     const order = await this.orderModel.findById(orderID).exec();
+    if (order.driver !== driverID) throw new ConflictException('Driver dont have permission to complete this order');
     if (!order) throw new ConflictException('Order not found');
     if (order.orderStatus !== OrderStatus.INPROGRESS) throw new ConflictException('Order is not in progress');
     try {
       order.orderStatus = OrderStatus.COMPLETED;
       order.save();
       // this.eventEmitter.emit('order.complete', order);
-      return result;
+      return result = 'success';
     } catch (error) {
       return result = error.message;
     }
