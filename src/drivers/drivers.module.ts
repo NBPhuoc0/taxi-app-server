@@ -5,7 +5,7 @@ import { DriverSchema } from './schemas/driver.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AzureStorageModule } from '../utils/auzre/storage-blob.module';
 import { OrdersModule } from 'src/orders/orders.module';
-import { TwilioModule } from 'nestjs-twilio';
+// import { TwilioModule } from 'nestjs-twilio';
 import { ConfigService } from '@nestjs/config';
 
 @Module({
@@ -15,13 +15,13 @@ import { ConfigService } from '@nestjs/config';
     ]),
     OrdersModule,
     AzureStorageModule,
-    TwilioModule.forRootAsync({
-      useFactory: (cfg: ConfigService) => ({
-        accountSid: cfg.get('TWILIO_ACCOUNT_SID'),
-        authToken: cfg.get('TWILIO_AUTH_TOKEN'),
-      }),
-      inject: [ConfigService],
-    }),
+    // TwilioModule.forRootAsync({
+    //   useFactory: (cfg: ConfigService) => ({
+    //     accountSid: cfg.get('TWILIO_ACCOUNT_SID'),
+    //     authToken: cfg.get('TWILIO_AUTH_TOKEN'),
+    //   }),
+    //   inject: [ConfigService],
+    // }),
   ],
   controllers: [DriversController],
   providers: [DriversService],

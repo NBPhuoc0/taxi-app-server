@@ -53,33 +53,33 @@ export class AuthController {
     //   return this.authService.signUpOTP_verify(createUserDto);
     // }
 
-    @ApiBody({
-        description: 'Check if phone number is registered then send OTP',
-        type: CreateUserDto_send,
+    // @ApiBody({
+    //     description: 'Check if phone number is registered then send OTP',
+    //     type: CreateUserDto_send,
         
-    })
-    @ApiOkResponse({
-        status: 200,
-        description: 'returns 200 status when phone number is valid and sends OTP',
-    })
-    @Post('driver/signup-send-otp')
-    signup_otp_driver(@Body() data: AuthDto_send) {
-      return this.authService.signUpOTP_Driver(data);
-    }
+    // })
+    // @ApiOkResponse({
+    //     status: 200,
+    //     description: 'returns 200 status when phone number is valid and sends OTP',
+    // })
+    // @Post('driver/signup-send-otp')
+    // signup_otp_driver(@Body() data: AuthDto_send) {
+    //   return this.authService.signUpOTP_Driver(data);
+    // }
 
-    @ApiBody({
-      description: 'verify otp',
-      type: AuthDto_verify,
+    // @ApiBody({
+    //   description: 'verify otp',
+    //   type: AuthDto_verify,
       
-    })
-    @ApiCreatedResponse({
-        status: 200,
-        description: 'return verified message',
-    })
-    @Post('driver/signup-verify-otp')
-    signup_driver_verifyOTP(@Body() otpDriver: AuthDto_verify) {
-      return this.authService.signUp_driver_verifyOTP(otpDriver);
-    }
+    // })
+    // @ApiCreatedResponse({
+    //     status: 200,
+    //     description: 'return verified message',
+    // })
+    // @Post('driver/signup-verify-otp')
+    // signup_driver_verifyOTP(@Body() otpDriver: AuthDto_verify) {
+    //   return this.authService.signUp_driver_verifyOTP(otpDriver);
+    // }
 
     @ApiBody({
         description: 'Contains properties to create User',
@@ -111,33 +111,33 @@ export class AuthController {
 
 
 
-    @ApiBody({
-        description: 'Check if phone number is registered then send OTP',
-        type: AuthDto_send,
+    // @ApiBody({
+    //     description: 'Check if phone number is registered then send OTP',
+    //     type: AuthDto_send,
         
-    })
-    @ApiOkResponse({
-        status: 200,
-        description: 'returns 200 status when phone number is valid and sends OTP',
-    })
-    @Post('user/signinsend')
-    signin_otp(@Body() data: AuthDto_send) {
-      return this.authService.signInOTP_send(data);
-    }
+    // })
+    // @ApiOkResponse({
+    //     status: 200,
+    //     description: 'returns 200 status when phone number is valid and sends OTP',
+    // })
+    // @Post('user/signinsend')
+    // signin_otp(@Body() data: AuthDto_send) {
+    //   return this.authService.signInOTP_send(data);
+    // }
 
-    @ApiBody({
-        description: 'Contains properties login a User',
-        type: AuthDto_verify,
+    // @ApiBody({
+    //     description: 'Contains properties login a User',
+    //     type: AuthDto_verify,
         
-    })
-    @ApiOkResponse({
-        status: 200,
-        description: 'returns 200 status and a refresh and access token when a user successfully signs in',
-    })
-    @Post('user/signinverify')
-    signin_verify(@Body() data: AuthDto_verify) {
-      return this.authService.signInOTP_verify(data);
-    }
+    // })
+    // @ApiOkResponse({
+    //     status: 200,
+    //     description: 'returns 200 status and a refresh and access token when a user successfully signs in',
+    // })
+    // @Post('user/signinverify')
+    // signin_verify(@Body() data: AuthDto_verify) {
+    //   return this.authService.signInOTP_verify(data);
+    // }
   
 
     @ApiOkResponse({

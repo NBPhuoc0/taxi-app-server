@@ -19,7 +19,7 @@ export class CreateDriverDto {
     @ApiProperty()
     @IsNotEmpty()
     @IsEnum(Vehicle)
-    vehicle: string
+    vehicle: Vehicle
 
     refreshToken: string
 

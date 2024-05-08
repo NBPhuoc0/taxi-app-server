@@ -21,7 +21,7 @@ export class AdminController {
     private readonly userService: UsersService,
     private readonly driverService: DriversService,
     private readonly orderService: OrdersService,
-    private readonly twilioService: TwilioService,
+    // private readonly twilioService: TwilioService,
   ) {}
 
   logger = new Logger()
@@ -204,22 +204,22 @@ export class AdminController {
     return this.orderService.cancelListOrderByAdmin(body.id);
   }
 
-  //
-  @Post('sms')
-  sendSMS(@Body() body: {phone: string, message: string}) {
-    try {
-      return this.twilioService.client.messages.create(
-        {
-          body: body.message,
-          from: '+12058436918',
-          to: body.phone,
-          // Body: "hé looo"
-          // From: "+12023189346"
-          // To: "+84333495017"
-        },
-      );
-    } catch (error) {
-      return error;
-    }
-  }
+  // //
+  // @Post('sms')
+  // sendSMS(@Body() body: {phone: string, message: string}) {
+  //   try {
+  //     return this.twilioService.client.messages.create(
+  //       {
+  //         body: body.message,
+  //         from: '+12058436918',
+  //         to: body.phone,
+  //         // Body: "hé looo"
+  //         // From: "+12023189346"
+  //         // To: "+84333495017"
+  //       },
+  //     );
+  //   } catch (error) {
+  //     return error;
+  //   }
+  // }
 }

@@ -8,6 +8,7 @@ import { OrdersService } from 'src/orders/orders.service';
 import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
 import { location } from 'src/utils/interface/location.interface';
 import { DriversService } from 'src/drivers/drivers.service';
+import { log } from 'console';
 
 @ApiTags('Users')
 @Controller('users')
@@ -63,7 +64,9 @@ export class UsersController {
 
   @Post('getDriverLocationByBR')
   async getDriverLocationByBR(@Body() body: { booking_id: string }) {
+    log(body.booking_id);
     const driver = await this.ordersService.findByid_driver(body.booking_id);
+    log(driver);
     return this.driverService.findById_location(driver);
   }
     

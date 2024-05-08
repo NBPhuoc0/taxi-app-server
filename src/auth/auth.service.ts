@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { UsersService } from './../users/users.service';
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { TwilioService } from 'nestjs-twilio';
+// import { TwilioService } from 'nestjs-twilio';
 import { CreateUserDto_send } from '../users/dto/signup-send.dto';
 import { CreateUserDto_verify } from '../users/dto/signup-verify.dto';
 import { AuthDto_send } from './dto/auth_send.dto';
@@ -23,7 +23,7 @@ export class AuthService {
         private adminService: AdminService,
         private configService: ConfigService,
         private jwtService: JwtService,
-        private readonly twilioService: TwilioService,
+        // private readonly twilioService: TwilioService,
     ) {}
 
     logger = new Logger('AuthService');
@@ -56,83 +56,83 @@ export class AuthService {
 
 
 
-    async signUpOTP_Driver(authDto: AuthDto_send) {
-        const driver = await this.driverService.findByPhone(authDto.phone);
-        if(driver){
-            throw new BadRequestException('Phone number already exists')
-        } else {
-            const msg = await this.sendOTP(authDto.phone);
-            return msg;
-        }
-    }
+    // async signUpOTP_Driver(authDto: AuthDto_send) {
+    //     const driver = await this.driverService.findByPhone(authDto.phone);
+    //     if(driver){
+    //         throw new BadRequestException('Phone number already exists')
+    //     } else {
+    //         const msg = await this.sendOTP(authDto.phone);
+    //         return msg;
+    //     }
+    // }
 
-    async signUp_driver_verifyOTP(authDto: AuthDto_verify) {
-        if (await this.verifyOTP(authDto.phone, authDto.code)) {
-            return{
-                error: false,
-                msg: 'OTP is correct',
-            }
-        } else {
-            throw new BadRequestException('OTP is not correct')
-        }
-    }
+    // async signUp_driver_verifyOTP(authDto: AuthDto_verify) {
+    //     if (await this.verifyOTP(authDto.phone, authDto.code)) {
+    //         return{
+    //             error: false,
+    //             msg: 'OTP is correct',
+    //         }
+    //     } else {
+    //         throw new BadRequestException('OTP is not correct')
+    //     }
+    // }
 
-    async signInOTP_send(authDto: AuthDto_send) {
-        const user = await this.usersService.findByPhone(authDto.phone)
+    // async signInOTP_send(authDto: AuthDto_send) {
+    //     const user = await this.usersService.findByPhone(authDto.phone)
 
-        if(!user) throw new NotFoundException('User does not exist')
-        else {
-            const msg = await this.sendOTP(authDto.phone);
-            return msg;
-        }
-    }
+    //     if(!user) throw new NotFoundException('User does not exist')
+    //     else {
+    //         const msg = await this.sendOTP(authDto.phone);
+    //         return msg;
+    //     }
+    // }
 
-    async signInOTP_verify(authDto: AuthDto_verify) {
-        if (await this.verifyOTP(authDto.phone, authDto.code)) {
-            const user = await this.usersService.findByPhone(authDto.phone)
-            const tokens = await this.getTokens(user._id, 'user')
-            await this.updateRefreshTokenU(user._id, tokens.refreshToken)
-            return { ...tokens }
-        } else {
-            throw new BadRequestException('OTP is not correct')
-        }
-        // return this.verifyOTP(authDto.phone, authDto.code);
-    }
+    // async signInOTP_verify(authDto: AuthDto_verify) {
+    //     if (await this.verifyOTP(authDto.phone, authDto.code)) {
+    //         const user = await this.usersService.findByPhone(authDto.phone)
+    //         const tokens = await this.getTokens(user._id, 'user')
+    //         await this.updateRefreshTokenU(user._id, tokens.refreshToken)
+    //         return { ...tokens }
+    //     } else {
+    //         throw new BadRequestException('OTP is not correct')
+    //     }
+    //     // return this.verifyOTP(authDto.phone, authDto.code);
+    // }
 
-    async sendOTP(phone: string) {
-        let msg ;
-        try {
-            await this.twilioService.client.verify.v2
-                .services(this.configService.get('TWILIO_VERIFY_SERVICE_SID'))
-                .verifications.create({to: phone, channel: 'sms'})
-                .then(verifications => { msg = verifications});
-        } catch (error) {
-            this.logger.log(error);
-            return error;
-        }
-        return msg;
-    }
+    // async sendOTP(phone: string) {
+    //     let msg ;
+    //     try {
+    //         await this.twilioService.client.verify.v2
+    //             .services(this.configService.get('TWILIO_VERIFY_SERVICE_SID'))
+    //             .verifications.create({to: phone, channel: 'sms'})
+    //             .then(verifications => { msg = verifications});
+    //     } catch (error) {
+    //         this.logger.log(error);
+    //         return error;
+    //     }
+    //     return msg;
+    // }
 
-    async verifyOTP(phone: string, code: string) {
-        this.logger.log('verifyOTP: '.concat(code));
-        let msg;
-        try {
-            await this.twilioService.client.verify.v2
-                .services(this.configService.get('TWILIO_VERIFY_SERVICE_SID'))
-                .verificationChecks.create({to: phone, code: code})
-                .then(verification_check => { msg = verification_check});
-            if (msg.status === 'approved') {
-                this.logger.log('ố dè');
-                return true;
-            } else {
-                this.logger.log('nuh uh');
-                return false;
-            }
-        } catch (error) {
-            this.logger.log(error);
-            return false;
-        }
-    }
+    // async verifyOTP(phone: string, code: string) {
+    //     this.logger.log('verifyOTP: '.concat(code));
+    //     let msg;
+    //     try {
+    //         await this.twilioService.client.verify.v2
+    //             .services(this.configService.get('TWILIO_VERIFY_SERVICE_SID'))
+    //             .verificationChecks.create({to: phone, code: code})
+    //             .then(verification_check => { msg = verification_check});
+    //         if (msg.status === 'approved') {
+    //             this.logger.log('ố dè');
+    //             return true;
+    //         } else {
+    //             this.logger.log('nuh uh');
+    //             return false;
+    //         }
+    //     } catch (error) {
+    //         this.logger.log(error);
+    //         return false;
+    //     }
+    // }
 
     async logoutU(userId: string) {
         return this.usersService.update(userId, { refreshToken: null })
